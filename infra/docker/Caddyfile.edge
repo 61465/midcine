@@ -1,0 +1,26 @@
+# Caddyfile for midcine edge box
+# Routes:
+#   /          → Orthanc Web UI
+#   /api/      → Ingestion API (cloud-only; here forward to placeholder)
+#   /minio/    → MinIO Console (port 9001)
+
+:443 {
+  encode zstd gzip
+
+  handle_path /minio/* {
+    reverse_proxy minio:9001
+  }
+
+  handle {
+    reverse_proxy orthanc:8042
+  }
+
+  log {
+    output stdout
+    format json
+  }
+}
+
+:80 {
+  redir https://{host}{uri} permanent
+}

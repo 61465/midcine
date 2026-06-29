@@ -1,0 +1,44 @@
+# mcp-bridge dispatch rules
+# Each rule: if every key in `match` equals the study's metadata,
+# add every entry in `agents` to the dispatch list (deduped).
+# Agents are NEXUS-AI MCP agent identifiers (see D:\project\suportagent\config\agents.py).
+# Adapted from v12 services/ai-dispatcher/config/dispatch_rules.yaml.
+
+- match:
+    modality: CR
+    body_part: CHEST
+  agents:
+    - vision_ai          # general radiology vision specialist
+    - clinical_llm       # report drafter
+    - guardian           # safety / sanity check
+
+- match:
+    modality: DR
+    body_part: CHEST
+  agents:
+    - vision_ai
+    - clinical_llm
+    - guardian
+
+- match:
+    modality: CT
+    body_part: BRAIN
+  agents:
+    - vision_ai
+    - clinical_llm
+    - guardian
+    - algorithm_expert   # for hemorrhage / mass scoring
+
+- match:
+    modality: MR
+    body_part: BRAIN
+  agents:
+    - vision_ai
+    - clinical_llm
+    - guardian
+
+# Fallback for anything else: minimal pair
+- match: {}
+  agents:
+    - vision_ai
+    - clinical_llm
