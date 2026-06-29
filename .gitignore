@@ -1,0 +1,107 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.uv/
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+# Test + coverage
+coverage/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# Environment + secrets
+.env
+.env.local
+.env.*.local
+*.local
+secrets.json
+secrets/
+*.pem
+*.key
+!*.example
+.infisical.json
+
+# IDE
+.vscode/*
+!.vscode/settings.json.example
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+bootstrap.log
+
+# DICOM + medical data (NEVER commit)
+*.dcm
+!fixtures/**/*.dcm
+*.nii
+*.nii.gz
+*.nrrd
+patient-data/
+phi/
+
+# Docker
+.docker/
+infra/docker/data/
+
+# Backups
+*.backup
+*.bak
+*.snapshot
+*.tar
+*.tar.gz
+*.tar.zst
+*.zip
+
+# AI models (too large for git)
+models/
+*.gguf
+*.safetensors
+*.pt
+*.pth
+*.bin
+*.onnx
+
+# Edge pusher inbox
+apps/edge-pusher/inbox/*.dcm
+!apps/edge-pusher/inbox/.gitkeep
+
+# Certs (dev only)
+infra/certs/*.pem
+infra/certs/*.key
+
+# Fixtures
+fixtures/*.dcm
+!fixtures/README.md
+!fixtures/*.json
+
+# Archived
+apps/web-archived/

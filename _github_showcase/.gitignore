@@ -1,0 +1,8 @@
+# Allow only the showcase folder contents
+*
+!README.md
+!ARCHITECTURE.md
+!.gitignore
+!screenshots/
+screenshots/*
+!screenshots/.gitkeep

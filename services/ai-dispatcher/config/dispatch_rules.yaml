@@ -1,0 +1,44 @@
+# AI Dispatcher routing rules.
+# Each rule: if every key in `match` equals the study's metadata,
+# add every model in `models` to the dispatch list (deduped).
+
+- match:
+    modality: CR
+    body_part: CHEST
+  models:
+    - torchxrayvision
+    - segmentation
+    - vision_language
+    - clinical_llm
+
+- match:
+    modality: DR
+    body_part: CHEST
+  models:
+    - torchxrayvision
+    - segmentation
+    - vision_language
+    - clinical_llm
+
+- match:
+    modality: CT
+    body_part: BRAIN
+  models:
+    - monai_brain
+    - segmentation
+    - vision_language
+    - clinical_llm
+
+- match:
+    modality: MR
+    body_part: BRAIN
+  models:
+    - segmentation
+    - vision_language
+    - clinical_llm
+
+# Fallback for anything else: VLM + LLM only
+- match: {}
+  models:
+    - vision_language
+    - clinical_llm

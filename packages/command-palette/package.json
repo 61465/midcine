@@ -1,0 +1,28 @@
+{
+  "name": "@midcine/command-palette",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Global ⌘K command palette shared across all midcine apps",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint src --max-warnings=0",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "cmdk": "^1.0.4",
+    "lucide-react": "^0.460.0",
+    "@midcine/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.6"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

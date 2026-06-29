@@ -1,0 +1,19 @@
+packages:
+  - 'apps/worklist'
+  - 'apps/reader'
+  - 'apps/patient'
+  - 'apps/insights'
+  - 'apps/connect'
+  - 'apps/console'
+  - 'apps/mobile'
+  - 'packages/ui'
+  - 'packages/auth'
+  - 'packages/api-client'
+  - 'packages/event-bus'
+  - 'packages/command-palette'
+  - 'packages/shared-types/ts'
+
+# excluded (Python-only or external):
+#   - apps/edge-pusher (Python, managed by uv)
+#   - apps/viewer (OHIF Docker image)
+#   - apps/web (archived, replaced by 7 modular apps)

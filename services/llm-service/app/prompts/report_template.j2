@@ -1,0 +1,50 @@
+{#- قالب يولّد تقرير عربي مهيكل من قياسات AI -#}
+{%- set is_hemorrhage = ai_label == 'intracranial_hemorrhage' -%}
+{%- set vol = ai_measurements.get('approx_volume_cc', 0) -%}
+{%- set midline = ai_measurements.get('midline_shift_mm', 0) -%}
+{%- set vc = ai_measurements.get('ventricular_compression', False) -%}
+
+## التقنية المستخدمة
+أُجري للمريض فحص أشعة مقطعية على {{ body_part_ar }} بدون استخدام مادة تباين، بسماكة شريحة 5 مم.
+
+## النتائج
+{% if is_hemorrhage -%}
+- وجود تجمع دموي حاد داخل متن المخ، الحجم التقريبي {{ "%.1f"|format(vol) }} سم مكعب، كثافة 55-95 HU.
+{% if vc -%}
+- ضغط واضح على البطين الجانبي يستدعي المتابعة العاجلة.
+{%- endif %}
+{% if midline > 1 -%}
+- انحراف الخط الناصف (midline shift) بمقدار {{ "%.1f"|format(midline) }} مم.
+{%- endif %}
+- لا دلائل واضحة على نزيف تحت العنكبوتية في الفحص الحالي.
+{%- else -%}
+- لا دلائل على نزيف حاد أو كتل واضحة في الـ {{ body_part_ar }}.
+- المعالم التشريحية الطبيعية محفوظة. النظام البطيني والصهاريج القاعدية بشكل طبيعي.
+- العظام والأنسجة الرخوة المحيطة بدون شذوذ ملحوظ.
+{%- endif %}
+
+## الانطباع
+{% if is_hemorrhage -%}
+نزيف داخل متن المخ حاد {%- if vc %} مع ضغط على البطين الجانبي{% endif -%}
+{%- if midline > 1 %} وانحراف خفيف للخط الناصف{% endif %}.
+**ICD-11: 8B00.0 — Intracerebral haemorrhage**
+{%- if ai_confidence < 0.85 %}
+> ملاحظة: ثقة AI {{ "%.0f"|format(ai_confidence * 100) }}% — يحتاج مراجعة الطبيب.
+{%- endif %}
+{%- else -%}
+فحص {{ body_part_ar }} ضمن الحدود الطبيعية للعمر.
+**ICD-11: QA00.YY — Normal radiological finding**
+{%- endif %}
+
+## التوصيات
+{% if is_hemorrhage -%}
+- استشارة جراحة المخ والأعصاب عاجلاً.
+- متابعة CT خلال 6 ساعات لتقييم استقرار الحجم.
+- ضبط ضغط الدم بدقة.
+{%- if patient_age and patient_age|int >= 60 -%}
+- مراجعة الأدوية المضادة للتخثر إن وُجدت.
+{%- endif %}
+{%- else -%}
+- لا توصيات إكلينيكية حالية.
+- متابعة دورية حسب التقييم السريري.
+{%- endif %}

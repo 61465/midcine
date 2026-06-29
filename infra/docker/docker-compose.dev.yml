@@ -1,0 +1,269 @@
+name: midcine
+
+# نموذج تجريبي E2E بدون GPU — ~7GB RAM (افتراضي)، 14GB مع profile=llm-real
+# تشغيل:
+#   docker compose -f infra/docker/docker-compose.dev.yml --env-file .env up -d
+#   docker compose -f infra/docker/docker-compose.dev.yml --profile llm-real up -d   # مع Ollama
+
+services:
+  postgres:
+    image: paradedb/paradedb:0.24.0-pg16
+    container_name: midcine-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_SUPERUSER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:-changeme_dev_super}
+      POSTGRES_DB: ${POSTGRES_DB:-midcine}
+      APP_USER: ${POSTGRES_USER:-midcine_app}
+      APP_PASSWORD: ${POSTGRES_PASSWORD:-changeme_dev_only}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../sql/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d midcine"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [midcine]
+
+  redis:
+    image: redis:7-alpine
+    container_name: midcine-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports: ["6380:6379"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks: [midcine]
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2024-12-13T22-19-12Z
+    container_name: midcine-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-midcine-dev}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-midcine-dev-secret-change-me}
+    ports:
+      - "13900:9000"
+      - "13901:9001"
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [midcine]
+
+  minio-bootstrap:
+    image: quay.io/minio/mc:RELEASE.2024-11-21T17-21-54Z
+    container_name: midcine-minio-bootstrap
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-midcine-dev}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-midcine-dev-secret-change-me}
+      MINIO_BUCKET: ${MINIO_BUCKET:-midcine-studies}
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 $$MINIO_ACCESS_KEY $$MINIO_SECRET_KEY; do
+        echo waiting for minio; sleep 2; done;
+      mc mb -p local/$$MINIO_BUCKET || true;
+      mc mb -p local/midcine-heatmaps || true;
+      mc mb -p local/midcine-reports || true;
+      mc anonymous set download local/midcine-heatmaps;
+      echo 'minio buckets ready';
+      "
+    networks: [midcine]
+
+  orthanc:
+    image: orthancteam/orthanc:24.6.1
+    container_name: midcine-orthanc
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "13042:8042"     # REST + UI
+      - "13112:4242"     # DICOM C-STORE
+    environment:
+      VERBOSE_ENABLED: "true"
+      ORTHANC__POSTGRESQL__HOST: postgres
+      ORTHANC__POSTGRESQL__PORT: 5432
+      ORTHANC__POSTGRESQL__DATABASE: orthanc
+      ORTHANC__POSTGRESQL__USERNAME: ${POSTGRES_SUPERUSER:-postgres}
+      ORTHANC__POSTGRESQL__PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:-changeme_dev_super}
+      ORTHANC__POSTGRESQL__ENABLE_INDEX: "true"
+      ORTHANC__POSTGRESQL__ENABLE_STORAGE: "true"
+      ORTHANC__REGISTERED_USERS: |
+        {"${ORTHANC_USERNAME:-midcine}": "${ORTHANC_PASSWORD:-changeme_dev_only}"}
+      ORTHANC__DICOM_WEB__ENABLE: "true"
+      ORTHANC__DICOM_WEB__ROOT: "/dicom-web/"
+      ORTHANC__HTTP_PORT: 8042
+      ORTHANC__DICOM_PORT: 4242
+      ORTHANC__DICOM_AET: "MIDCINE"
+      ORTHANC__REMOTE_ACCESS_ALLOWED: "true"
+      ORTHANC__AUTHENTICATION_ENABLED: "false"
+      ORTHANC__HTTP_HEADERS: |
+        {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers": "Origin, Content-Type, Accept, Authorization, Token, Content-Encoding"}
+      ORTHANC__WEBHOOKS__INGESTION_NEW_INSTANCE: "http://ingestion-api:8100/v1/internal/orthanc-webhook"
+    volumes:
+      - orthancdata:/var/lib/orthanc/db
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-u", "${ORTHANC_USERNAME:-midcine}:${ORTHANC_PASSWORD:-changeme_dev_only}", "http://localhost:8042/system"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks: [midcine]
+
+  ingestion-api:
+    build:
+      context: ../..
+      dockerfile: services/ingestion-api/Dockerfile
+    container_name: midcine-ingestion
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+      minio:    { condition: service_healthy }
+    env_file: ../../.env
+    environment:
+      SERVICE_NAME: ingestion-api
+    ports: ["13100:8100"]
+    networks: [midcine]
+
+  ai-worker:
+    build:
+      context: ../..
+      dockerfile: services/ai-worker/Dockerfile
+    container_name: midcine-ai-worker
+    depends_on:
+      ingestion-api: { condition: service_started }
+      redis:         { condition: service_healthy }
+    env_file: ../../.env
+    environment:
+      SERVICE_NAME: ai-worker
+    networks: [midcine]
+
+  llm-service:
+    build:
+      context: ../..
+      dockerfile: services/llm-service/Dockerfile
+    container_name: midcine-llm
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    env_file: ../../.env
+    environment:
+      SERVICE_NAME: llm-service
+    ports: ["13300:8300"]
+    networks: [midcine]
+
+  fhir-gateway:
+    build:
+      context: ../..
+      dockerfile: services/fhir-gateway/Dockerfile
+    container_name: midcine-fhir
+    depends_on:
+      postgres: { condition: service_healthy }
+    env_file: ../../.env
+    environment:
+      SERVICE_NAME: fhir-gateway
+    ports: ["13400:8400"]
+    networks: [midcine]
+
+  web:
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+    container_name: midcine-web
+    depends_on:
+      ingestion-api: { condition: service_started }
+    env_file: ../../.env
+    ports: ["13000:3000"]
+    networks: [midcine]
+
+  viewer:
+    image: ohif/app:v3.10.0
+    container_name: midcine-viewer
+    environment:
+      APP_CONFIG: /usr/share/nginx/html/app-config.js
+    ports: ["13030:80"]
+    volumes:
+      - ./ohif-app-config.js:/usr/share/nginx/html/app-config.js:ro
+    networks: [midcine]
+
+  vision-ai:
+    build:
+      context: ../..
+      dockerfile: services/vision-ai/Dockerfile
+    container_name: midcine-vision
+    depends_on:
+      minio: { condition: service_healthy }
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      VISION_MODEL: ${VISION_MODEL:-moondream}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-midcine-dev}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-midcine-dev-secret-change-me}
+    ports: ["13600:8600"]
+    networks: [midcine]
+
+  dicom-receiver:
+    build:
+      context: ../..
+      dockerfile: services/dicom-receiver/Dockerfile
+    container_name: midcine-dicom-recv
+    depends_on:
+      ingestion-api: { condition: service_started }
+    environment:
+      INGESTION_URL: http://ingestion-api:8100
+      AE_TITLE: MIDCINE
+      LISTEN_PORT: "11113"
+      STUDY_DEBOUNCE_SECONDS: "8"
+      ALLOWED_AETS: ""
+    ports:
+      - "13113:11113"
+    networks: [midcine]
+
+  whatsapp-bridge:
+    build:
+      context: ../..
+      dockerfile: services/whatsapp-bridge/Dockerfile
+    container_name: midcine-whatsapp
+    depends_on:
+      redis: { condition: service_healthy }
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      MINIO_PUBLIC_ENDPOINT: http://minio:9000
+      WA_SIMULATE: ${WA_SIMULATE:-true}
+      HTTP_PORT: "8500"
+      LOG_LEVEL: info
+    ports: ["13500:8500"]
+    volumes:
+      - wadata:/app/auth_state
+    networks: [midcine]
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: midcine-ollama
+    ports: ["13434:11434"]
+    volumes:
+      - ollamadata:/root/.ollama
+    networks: [midcine]
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:
+  orthancdata:
+  ollamadata:
+  wadata:
+
+networks:
+  midcine:
+    driver: bridge

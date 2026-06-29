@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --border: 214 32% 91%;
+    --ring: 199 89% 48%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222 47% 8%;
+    --foreground: 0 0% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 0 0% 98%;
+    --primary: 199 89% 58%;
+    --primary-foreground: 222 47% 8%;
+    --muted: 215 28% 17%;
+    --muted-foreground: 215 16% 65%;
+    --border: 215 28% 17%;
+    --ring: 199 89% 58%;
+  }
+
+  html[dir='rtl'] {
+    font-family: var(--font-arabic, 'IBM Plex Sans Arabic'), system-ui, sans-serif;
+  }
+
+  html[dir='ltr'] {
+    font-family: var(--font-latin, 'IBM Plex Sans'), system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'kern', 'liga';
+  }
+
+  /* Arabic-Hindi numerals when in Arabic context */
+  .arabic-numerals {
+    font-variant-numeric: normal;
+    font-feature-settings: 'ss01';
+  }
+}
+
+@layer components {
+  .midcine-focus-ring {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}

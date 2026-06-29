@@ -1,0 +1,130 @@
+[project]
+name = "midcine"
+version = "0.2.0"
+description = "midcine RIS/PACS — Arabic cloud-native radiology suite"
+requires-python = ">=3.12"
+
+[tool.uv.workspace]
+members = [
+    "services/ingestion-api",
+    "services/ai-worker",
+    "services/ai-dispatcher",
+    "services/ai-aggregator",
+    "services/llm-service",
+    "services/vision-ai",
+    "services/fhir-gateway",
+    "services/dicom-receiver",
+    "services/cloud-index",
+    "services/consent",
+    "services/tunnel-broker",
+    "apps/edge-pusher",
+    "packages/shared-types/py",
+    "packages/dicom-utils",
+    "tests",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "pytest-xdist>=3.6.0",
+    "pytest-mock>=3.14.0",
+    "pytest-rerunfailures>=14.0",
+    "respx>=0.21.0",
+    "httpx>=0.28.0",
+    "testcontainers[postgres,redis]>=4.8.0",
+    "factory-boy>=3.3.0",
+    "fakeredis>=2.26.0",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "bandit>=1.8.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv", "alembic/versions"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "W",   # pycodestyle warnings
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific
+    "S",   # flake8-bandit (security)
+    "A",   # flake8-builtins
+    "C4",  # flake8-comprehensions
+    "PT",  # flake8-pytest-style
+    "RET", # flake8-return
+    "TID", # flake8-tidy-imports
+]
+ignore = [
+    "E501",  # line too long (formatter handles)
+    "S101",  # assert (allowed in tests)
+    "S104",  # hardcoded bind 0.0.0.0 (dev only)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S", "PT"]
+"**/migrations/**/*.py" = ["E", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+exclude = ["alembic/versions/", "build/", "dist/"]
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests", "services/*/tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--showlocals",
+    "--tb=short",
+]
+markers = [
+    "unit: unit tests (fast, no external deps)",
+    "integration: integration tests (requires docker)",
+    "e2e: end-to-end tests (full stack)",
+    "slow: slow tests (skipped by default)",
+]
+
+[tool.coverage.run]
+source = ["services", "packages"]
+omit = ["*/tests/*", "*/migrations/*", "*/__pycache__/*"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]
+show_missing = true
+skip_covered = false

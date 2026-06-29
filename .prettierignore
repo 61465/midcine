@@ -1,0 +1,14 @@
+node_modules
+.next
+.turbo
+dist
+build
+coverage
+pnpm-lock.yaml
+*.min.js
+*.min.css
+infra/sql/migrations
+docs/adr
+docs/*.md
+*.dcm
+fixtures/

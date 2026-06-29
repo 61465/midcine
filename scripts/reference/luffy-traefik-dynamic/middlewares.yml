@@ -1,0 +1,30 @@
+http:
+  middlewares:
+    # ── Security headers ────────────────────────────────────────
+    secure-headers:
+      headers:
+        sslRedirect: true
+        forceSTSHeader: true
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+
+    # ── Rate limit (API) ────────────────────────────────────────
+    rate-limit-api:
+      rateLimit:
+        average: 60
+        burst: 20
+        period: 1m
+
+    # ── Gzip compression ────────────────────────────────────────
+    gzip:
+      compress: {}
+
+    # ── Basic auth for dashboards ────────────────────────────────
+    # Generate: echo $(htpasswd -nB admin) | sed -e s/\\$/\\$\\$/g
+    dashboard-auth:
+      basicAuth:
+        users:
+          - "${DASHBOARD_USER}"

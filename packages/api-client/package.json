@@ -1,0 +1,34 @@
+{
+  "name": "@midcine/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Typed FastAPI clients auto-generated from OpenAPI specs",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./ingestion": "./src/clients/ingestion.ts",
+    "./fhir": "./src/clients/fhir.ts",
+    "./llm": "./src/clients/llm.ts",
+    "./ai-dispatcher": "./src/clients/ai-dispatcher.ts",
+    "./cloud-index": "./src/clients/cloud-index.ts",
+    "./consent": "./src/clients/consent.ts",
+    "./realtime": "./src/realtime.ts"
+  },
+  "scripts": {
+    "generate": "node scripts/generate-clients.mjs",
+    "lint": "eslint src --max-warnings=0",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "ky": "^1.7.4",
+    "zod": "^3.23.8",
+    "@midcine/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.4.4",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.6"
+  }
+}

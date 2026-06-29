@@ -1,0 +1,34 @@
+name: luffy
+
+# ═══════════════════════════════════════════════════════════════
+#  🏴‍☠️ LUFFY — WhatsApp SaaS Bot
+#  Plugs into existing server (nginx on 80/443, portainer on 9000)
+# ═══════════════════════════════════════════════════════════════
+
+services:
+
+  # ── WhatsApp Bot ─────────────────────────────────────────────────
+  whatsapp-bot:
+    build:
+      context: D:/project/mostqlworkwatssap/whatsapp-cafe-bot/whatsapp-cafe-bot
+      dockerfile: Dockerfile
+      network: host
+    image: luffy/whatsapp-bot:latest
+    container_name: luffy-whatsapp-bot
+    restart: unless-stopped
+    env_file:
+      - D:/project/mostqlworkwatssap/whatsapp-cafe-bot/whatsapp-cafe-bot/.env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    ports:
+      - "3005:3000"          # 3000/3005 free; 3000 taken by srv_gitea
+    volumes:
+      - E:/luffy-data/wa-sessions:/app/data/sessions
+      - E:/luffy-data/wa-data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s

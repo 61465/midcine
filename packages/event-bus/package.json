@@ -1,0 +1,20 @@
+{
+  "name": "@midcine/event-bus",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cross-app event bus (BroadcastChannel for same-browser + WebSocket bridge for cross-device)",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint src --max-warnings=0",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.6"
+  }
+}

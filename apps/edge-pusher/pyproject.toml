@@ -1,0 +1,13 @@
+[project]
+name = "midcine-edge-pusher"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.27",
+    "pydicom>=2.4",
+    "watchfiles>=0.24",
+    "midcine-dicom",
+]
+
+[tool.uv.sources]
+midcine-dicom = { path = "../../packages/dicom-utils" }
