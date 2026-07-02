@@ -13,13 +13,17 @@ import logging
 import time
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from .agents_client import fan_out, health_check
 from .aggregator import aggregate
 from .audit import audit, read_recent
+from .dicom_sr import encode_sr, encode_sr_dict
 from .dispatcher import Dispatcher
+from .hl7_oru import OruSendError, build_oru, send_oru
+from .phi_redactor import redact_study_prompt
 from .report import (
     FinalReport,
     GenerateRequest,
@@ -112,20 +116,35 @@ async def pipeline(req: PipelineRequest) -> PipelineResponse:
     agents, _matched = _dispatcher.match(req.study)
     tenant = req.study.hospital_id or "default"
 
-    # Build a compact user prompt for the agents
-    user_prompt = (
-        f"Study: modality={req.study.modality} body_part={req.study.body_part}. "
-        f"Patient: {req.study.patient_name or 'unknown'} (id={req.study.patient_id or 'n/a'}). "
-        f"Clinical context: {req.study.clinical_context or 'not provided'}. "
-        "Respond ONLY with the JSON object your role requires."
+    # Build a PHI-safe prompt for the agents.
+    # Patient name + IDs never reach the cloud LLM. Age coarsened to decade.
+    user_prompt, redaction_map = redact_study_prompt(
+        modality=req.study.modality,
+        body_part=req.study.body_part,
+        patient_name=req.study.patient_name,
+        patient_id=req.study.patient_id,
+        age=None,  # not in StudyMetadata schema; would come from patient store
+        sex=None,
+        clinical_context=req.study.clinical_context,
     )
 
-    log.info("pipeline START tenant=%s study=%s agents=%s", tenant, req.study.study_uid, agents)
+    log.info(
+        "pipeline START tenant=%s study=%s agents=%s phi_redactions=%d",
+        tenant,
+        req.study.study_uid,
+        agents,
+        len(redaction_map),
+    )
     audit(
         action="pipeline.start",
         tenant=tenant,
         target={"type": "study", "id": req.study.study_uid},
-        meta={"modality": req.study.modality, "body_part": req.study.body_part, "agents": agents},
+        meta={
+            "modality": req.study.modality,
+            "body_part": req.study.body_part,
+            "agents": agents,
+            "phi_redactions": len(redaction_map),
+        },
     )
 
     outputs = await fan_out(agents, user_prompt)
@@ -201,6 +220,73 @@ def report_sign(req: SignRequest) -> FinalReport:
 def whatsapp_send(req: SendReportRequest) -> WhatsAppMessage:
     """Deliver a signed report via WhatsApp (mock: writes to JSONL, returns delivered)."""
     return send_report(req)
+
+
+class OruSendRequest(BaseModel):
+    report: FinalReport
+    host: str
+    port: int = 2575
+    receiving_facility: str = "HOSPITAL"
+
+
+@app.post("/hl7/oru")
+def hl7_oru_send(req: OruSendRequest) -> dict:
+    """Send a signed FinalReport to the HIS as HL7 v2.5 ORU^R01 over MLLP."""
+    msg = build_oru(req.report, receiving_facility=req.receiving_facility)
+    try:
+        code, ctrl_id = send_oru(msg, req.host, req.port)
+    except OruSendError as e:
+        audit(
+            action="hl7.oru.fail",
+            tenant=req.report.hospital_id,
+            target={"type": "study", "id": req.report.study_uid},
+            ok=False,
+            meta={"host": req.host, "port": req.port, "error": str(e)},
+        )
+        return {"ok": False, "error": str(e)}
+    audit(
+        action="hl7.oru.sent",
+        tenant=req.report.hospital_id,
+        target={"type": "study", "id": req.report.study_uid},
+        meta={"host": req.host, "port": req.port, "control_id": ctrl_id},
+    )
+    return {"ok": True, "ack_code": code, "control_id": ctrl_id}
+
+
+@app.post("/hl7/oru/preview")
+def hl7_oru_preview(req: OruSendRequest) -> dict:
+    """Build the HL7 message without sending — for debugging."""
+    return {"message": build_oru(req.report, receiving_facility=req.receiving_facility)}
+
+
+class SrRequest(BaseModel):
+    report: FinalReport
+
+
+@app.post("/report/sr/summary")
+def report_sr_summary(req: SrRequest) -> dict:
+    """Build a DICOM SR from the FinalReport, return summary + byte size."""
+    summary = encode_sr_dict(req.report)
+    audit(
+        action="report.sr.built",
+        tenant=req.report.hospital_id,
+        target={"type": "study", "id": req.report.study_uid},
+        meta=summary,
+    )
+    return summary
+
+
+@app.post("/report/sr")
+def report_sr_download(req: SrRequest) -> Response:
+    """Return the raw DICOM SR bytes (application/dicom)."""
+    data = encode_sr(req.report)
+    audit(
+        action="report.sr.downloaded",
+        tenant=req.report.hospital_id,
+        target={"type": "study", "id": req.report.study_uid},
+        meta={"bytes": len(data)},
+    )
+    return Response(content=data, media_type="application/dicom")
 
 
 @app.get("/whatsapp/messages")
