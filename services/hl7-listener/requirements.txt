@@ -1,0 +1,2 @@
+# No external HL7 lib — parser is self-contained + zero-dep.
+# Uses stdlib asyncio + json only.

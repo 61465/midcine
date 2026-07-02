@@ -21,9 +21,7 @@ import { KIDNEY_STATES, KIDNEY_STATE_LIST, type KidneyStateId } from './kidney/p
 import { Filtration } from './kidney/filtration';
 import { KidneySvg } from './kidney/kidney-svg';
 // Shared
-import { BioDigitalEmbed } from './biodigital-embed';
 import { PathologyAtlas } from './pathology-atlas';
-import { VtkPlaceholder } from './vtk-placeholder';
 
 // 3D models — load client-only (WebGL)
 const Heart3D = dynamic(() => import('./heart-3d').then((m) => m.Heart3D), { ssr: false });
@@ -193,7 +191,7 @@ function HeartLab() {
           </GridPanel>
         </div>
       </div>
-      <div className="grid gap-3 lg:grid-cols-3">
+      <div className="grid gap-3 lg:grid-cols-1">
         <div className="h-[360px] overflow-hidden rounded-lg border border-gray-200 bg-white">
           <div className="border-b border-gray-200 bg-gray-50 px-3 py-1.5 text-[10px] text-gray-500">
             🎨 SVG cross-section
@@ -201,12 +199,6 @@ function HeartLab() {
           <div className="h-[calc(100%-30px)]">
             <HeartSvg rhythm={rhythm} bpm={bpm} />
           </div>
-        </div>
-        <div className="h-[360px] overflow-hidden rounded-lg border border-gray-200">
-          <BioDigitalEmbed compact />
-        </div>
-        <div className="h-[360px] overflow-hidden rounded-lg border border-gray-200">
-          <VtkPlaceholder />
         </div>
       </div>
     </div>
@@ -255,7 +247,7 @@ function LungsLab() {
           </GridPanel>
         </div>
       </div>
-      <div className="grid gap-3 lg:grid-cols-3">
+      <div className="grid gap-3 lg:grid-cols-1">
         <div className="h-[360px] overflow-hidden rounded-lg border border-gray-200 bg-white">
           <div className="border-b border-gray-200 bg-gray-50 px-3 py-1.5 text-[10px] text-gray-500">
             🎨 SVG cross-section
@@ -313,7 +305,7 @@ function BrainLab() {
           </GridPanel>
         </div>
       </div>
-      <div className="grid gap-3 lg:grid-cols-3">
+      <div className="grid gap-3 lg:grid-cols-1">
         <div className="h-[360px] overflow-hidden rounded-lg border border-gray-200 bg-white">
           <div className="border-b border-gray-200 bg-gray-50 px-3 py-1.5 text-[10px] text-gray-500">
             🎨 SVG top view
@@ -321,12 +313,6 @@ function BrainLab() {
           <div className="h-[calc(100%-30px)]">
             <BrainSvg state={st} />
           </div>
-        </div>
-        <div className="h-[360px] overflow-hidden rounded-lg border border-gray-200">
-          <BioDigitalEmbed compact />
-        </div>
-        <div className="h-[360px] overflow-hidden rounded-lg border border-gray-200">
-          <VtkPlaceholder />
         </div>
       </div>
     </div>
@@ -373,7 +359,7 @@ function KidneyLab() {
           </GridPanel>
         </div>
       </div>
-      <div className="grid gap-3 lg:grid-cols-3">
+      <div className="grid gap-3 lg:grid-cols-1">
         <div className="h-[360px] overflow-hidden rounded-lg border border-gray-200 bg-white">
           <div className="border-b border-gray-200 bg-gray-50 px-3 py-1.5 text-[10px] text-gray-500">
             🎨 SVG anatomy
@@ -381,12 +367,6 @@ function KidneyLab() {
           <div className="h-[calc(100%-30px)]">
             <KidneySvg state={st} />
           </div>
-        </div>
-        <div className="h-[360px] overflow-hidden rounded-lg border border-gray-200">
-          <BioDigitalEmbed compact />
-        </div>
-        <div className="h-[360px] overflow-hidden rounded-lg border border-gray-200">
-          <VtkPlaceholder />
         </div>
       </div>
     </div>

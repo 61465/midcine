@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import { Tajawal } from 'next/font/google';
 import Link from 'next/link';
-import { Search, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { MidcineAppSwitcher } from './_components/midcine-app-switcher';
 import { LocaleSync } from './_components/locale-sync';
 import { LocaleToggle } from './_components/locale-toggle';
+import { LocaleFooter } from './_components/locale-footer';
 import './globals.css';
 
 const tajawal = Tajawal({
@@ -49,22 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
               {/* Actions cluster */}
               <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  className="text-brand-800 hover:bg-gold-100 hover:text-gold-500 flex h-9 w-9 items-center justify-center rounded-full transition"
-                  aria-label="بحث"
-                >
-                  <Search className="h-4 w-4" />
-                </button>
                 <LocaleToggle />
-                <button
-                  type="button"
-                  className="btn-luxury px-4 py-2 text-xs"
-                  aria-label="افتح لوحة الأوامر (Ctrl+K)"
-                >
-                  <span className="ltr-only">⌘K</span>
-                  <span>أوامر</span>
-                </button>
               </div>
             </div>
           </header>
@@ -81,11 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   'linear-gradient(90deg, transparent, rgba(197,160,89,0.3), transparent)',
               }}
             />
-            <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
-              <span className="text-brand-300">© {new Date().getFullYear()} midcine</span>
-              <span>نظام معلومات إشعاعي عربي · Cloud-Native · Edge-first</span>
-              <span className="ltr-only text-gold-400">v3 · pre-alpha</span>
-            </div>
+            <LocaleFooter />
           </footer>
         </div>
       </body>
