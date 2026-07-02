@@ -30,6 +30,16 @@ export interface Disagreement {
   detail: string;
 }
 
+export interface AtlasSuggestion {
+  organ: 'heart' | 'lungs' | 'brain' | 'kidney';
+  condition_id: string;
+  label_ar: string;
+  label_en: string;
+  confidence: number;
+  matched_keywords: string[];
+  agents: string[];
+}
+
 export interface AggregateResponse {
   study_uid: string;
   findings: Finding[];
@@ -37,6 +47,7 @@ export interface AggregateResponse {
   overall_confidence: number;
   requires_human_review: boolean;
   agent_versions: Record<string, string>;
+  atlas_suggestions: AtlasSuggestion[];
 }
 
 export interface PipelineResponse {

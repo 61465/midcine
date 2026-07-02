@@ -1,9 +1,12 @@
-"""Consensus + disagreement detection.
+"""Consensus + disagreement detection + atlas-condition matching.
+
 Adapted from D:\\project\\midcine\\docs\\reference\\v12-extracts\\aggregator_pattern.py.
+Atlas suggestions layered on top via atlas_matcher.suggest_conditions.
 """
 
 from __future__ import annotations
 
+from .atlas_matcher import suggest_conditions
 from .schemas import (
     AggregateRequest,
     AggregateResponse,
@@ -15,7 +18,7 @@ CONFIDENCE_HIGH_THRESHOLD = 0.75
 DISAGREEMENT_SPREAD_THRESHOLD = 0.30
 
 
-def aggregate(req: AggregateRequest) -> AggregateResponse:
+def aggregate(req: AggregateRequest, body_part: str | None = None) -> AggregateResponse:
     successful = [o for o in req.outputs if o.ok]
     failed = [o for o in req.outputs if not o.ok]
 
@@ -54,6 +57,8 @@ def aggregate(req: AggregateRequest) -> AggregateResponse:
             )
         )
 
+    atlas_suggestions = suggest_conditions(req.outputs, body_part=body_part)
+
     return AggregateResponse(
         study_uid=req.study_uid,
         findings=findings,
@@ -61,4 +66,5 @@ def aggregate(req: AggregateRequest) -> AggregateResponse:
         overall_confidence=overall,
         requires_human_review=requires_review,
         agent_versions={o.agent: "naraya:mistral-large" for o in successful},
+        atlas_suggestions=atlas_suggestions,
     )

@@ -107,6 +107,32 @@ def read_month(
     return entries
 
 
+def read_recent(hospital_id: str | None = None, limit: int = 50) -> list[dict]:
+    """Return recent audit entries across all months, newest first."""
+    entries: list[dict] = []
+    files = sorted(AUDIT_DIR.glob("*.jsonl"), reverse=True)
+    for f in files:
+        try:
+            with f.open("r", encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        obj = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if hospital_id and obj.get("tenant") != hospital_id:
+                        continue
+                    entries.append(obj)
+        except OSError:
+            continue
+        if len(entries) >= limit * 3:
+            break
+    entries.sort(key=lambda e: e.get("ts", ""), reverse=True)
+    return entries[:limit]
+
+
 def cleanup(retention_months: int = 12) -> list[str]:
     """Delete audit files older than retention. Returns removed months."""
     now = datetime.now(UTC)

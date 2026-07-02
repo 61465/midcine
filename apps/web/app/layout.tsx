@@ -3,6 +3,8 @@ import { Tajawal } from 'next/font/google';
 import Link from 'next/link';
 import { Search, Sparkles } from 'lucide-react';
 import { MidcineAppSwitcher } from './_components/midcine-app-switcher';
+import { LocaleSync } from './_components/locale-sync';
+import { LocaleToggle } from './_components/locale-toggle';
 import './globals.css';
 
 const tajawal = Tajawal({
@@ -21,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ar" dir="rtl" className={tajawal.variable}>
       <body className="font-sans">
+        <LocaleSync />
         <div className="bg-background flex min-h-screen flex-col">
           {/* Fixed luxury header */}
           <header className="panel-glass sticky top-0 z-50">
@@ -53,12 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 >
                   <Search className="h-4 w-4" />
                 </button>
-                <button
-                  type="button"
-                  className="border-border text-muted-foreground hover:border-gold-400 hover:text-gold-400 hidden rounded-full border px-3.5 py-1.5 text-xs font-bold transition md:inline-flex"
-                >
-                  عربي · EN
-                </button>
+                <LocaleToggle />
                 <button
                   type="button"
                   className="btn-luxury px-4 py-2 text-xs"

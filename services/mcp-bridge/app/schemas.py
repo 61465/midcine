@@ -60,6 +60,19 @@ class Disagreement(BaseModel):
     detail: str
 
 
+class AtlasSuggestion(BaseModel):
+    """Suggested pathology-atlas card matching AI findings.
+    Frontend renders the corresponding midcine SVG."""
+
+    organ: Literal["heart", "lungs", "brain", "kidney"]
+    condition_id: str
+    label_ar: str
+    label_en: str
+    confidence: float
+    matched_keywords: list[str]
+    agents: list[str]
+
+
 class AggregateResponse(BaseModel):
     study_uid: str
     findings: list[Finding]
@@ -67,6 +80,7 @@ class AggregateResponse(BaseModel):
     overall_confidence: float
     requires_human_review: bool
     agent_versions: dict[str, str]
+    atlas_suggestions: list[AtlasSuggestion] = []
 
 
 class PipelineRequest(BaseModel):

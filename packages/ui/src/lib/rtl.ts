@@ -2,7 +2,7 @@ export type Direction = 'rtl' | 'ltr';
 
 export function getDirection(lang: string): Direction {
   const rtlLanguages = ['ar', 'fa', 'he', 'ur'];
-  const langCode = lang.split('-')[0].toLowerCase();
+  const langCode = (lang.split('-')[0] ?? lang).toLowerCase();
   return rtlLanguages.includes(langCode) ? 'rtl' : 'ltr';
 }
 

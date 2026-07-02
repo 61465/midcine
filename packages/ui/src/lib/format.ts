@@ -2,7 +2,7 @@
 const arabicHindiDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
 
 export function toArabicNumerals(input: string | number): string {
-  return String(input).replace(/[0-9]/g, (d) => arabicHindiDigits[parseInt(d, 10)]);
+  return String(input).replace(/[0-9]/g, (d) => arabicHindiDigits[parseInt(d, 10)] ?? d);
 }
 
 export function formatDate(date: Date | string, locale = 'ar-EG'): string {

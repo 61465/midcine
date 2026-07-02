@@ -18,8 +18,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .agents_client import fan_out, health_check
 from .aggregator import aggregate
-from .audit import audit
+from .audit import audit, read_recent
 from .dispatcher import Dispatcher
+from .report import (
+    FinalReport,
+    GenerateRequest,
+    SignRequest,
+    generate_from_aggregate,
+    sign_report,
+)
 from .schemas import (
     AggregateRequest,
     AggregateResponse,
@@ -28,6 +35,21 @@ from .schemas import (
     HealthResponse,
     PipelineRequest,
     PipelineResponse,
+)
+from .studies_store import (
+    PatientRecord,
+    StudyRecord,
+    get_patient,
+    get_study,
+    list_by_patient,
+    list_patients,
+    list_studies,
+)
+from .whatsapp_mock import (
+    SendReportRequest,
+    WhatsAppMessage,
+    list_messages,
+    send_report,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
@@ -107,7 +129,10 @@ async def pipeline(req: PipelineRequest) -> PipelineResponse:
     )
 
     outputs = await fan_out(agents, user_prompt)
-    agg = aggregate(AggregateRequest(study_uid=req.study.study_uid, outputs=outputs))
+    agg = aggregate(
+        AggregateRequest(study_uid=req.study.study_uid, outputs=outputs),
+        body_part=req.study.body_part,
+    )
     total_ms = (time.perf_counter() - started) * 1000
     log.info(
         "pipeline END   tenant=%s study=%s latency=%.0fms consensus=%.2f review=%s",
@@ -138,3 +163,130 @@ async def pipeline(req: PipelineRequest) -> PipelineResponse:
         aggregate=agg,
         total_latency_ms=total_ms,
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Report + WhatsApp endpoints
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@app.post("/report/generate", response_model=FinalReport)
+def report_generate(req: GenerateRequest) -> FinalReport:
+    """Build an editable Arabic report draft from AI outputs."""
+    report = generate_from_aggregate(req.study, req.aggregate, req.outputs)
+    audit(
+        action="report.generate",
+        tenant=report.hospital_id,
+        target={"type": "study", "id": report.study_uid},
+        meta={"modality": report.modality, "body_part": report.body_part},
+    )
+    return report
+
+
+@app.post("/report/sign", response_model=FinalReport)
+def report_sign(req: SignRequest) -> FinalReport:
+    """Stamp the report with radiologist name + license + timestamp."""
+    signed = sign_report(req)
+    audit(
+        action="report.sign",
+        tenant=signed.hospital_id,
+        actor={"type": "radiologist", "id": signed.signed_by or "?"},
+        target={"type": "study", "id": signed.study_uid},
+        meta={"license_no": signed.license_no},
+    )
+    return signed
+
+
+@app.post("/whatsapp/send", response_model=WhatsAppMessage)
+def whatsapp_send(req: SendReportRequest) -> WhatsAppMessage:
+    """Deliver a signed report via WhatsApp (mock: writes to JSONL, returns delivered)."""
+    return send_report(req)
+
+
+@app.get("/whatsapp/messages")
+def whatsapp_list(hospital_id: str, limit: int = 50) -> list[dict]:
+    """List recent WhatsApp deliveries for a hospital tenant."""
+    return list_messages(hospital_id=hospital_id, limit=limit)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Real data endpoints — read from local store. Empty until ingested.
+# Never fabricates patient data.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@app.get("/studies", response_model=list[StudyRecord])
+def studies_list(hospital_id: str | None = None, limit: int = 200) -> list[StudyRecord]:
+    """Return studies actually present in the local store. Empty until Orthanc/PACS wires in."""
+    return list_studies(hospital_id=hospital_id, limit=limit)
+
+
+@app.get("/studies/{study_uid}", response_model=StudyRecord)
+def studies_get(study_uid: str) -> StudyRecord:
+    rec = get_study(study_uid)
+    if rec is None:
+        # Return an empty shell so the reader page can still call /pipeline on any UID.
+        return StudyRecord(
+            study_uid=study_uid,
+            patient_id="",
+            patient_name="",
+            modality="CT",
+            body_part="BRAIN",
+            study_date="",
+        )
+    return rec
+
+
+@app.get("/patients/{patient_id}", response_model=PatientRecord | None)
+def patients_get(patient_id: str) -> PatientRecord | None:
+    return get_patient(patient_id)
+
+
+@app.get("/patients", response_model=list[PatientRecord])
+def patients_list(hospital_id: str | None = None) -> list[PatientRecord]:
+    return list_patients(hospital_id=hospital_id)
+
+
+@app.get("/patients/{patient_id}/studies", response_model=list[StudyRecord])
+def patient_studies(patient_id: str) -> list[StudyRecord]:
+    return list_by_patient(patient_id)
+
+
+@app.get("/audit/recent")
+def audit_recent(hospital_id: str | None = None, limit: int = 100) -> list[dict]:
+    """Return recent audit-log entries (actual events, no fabrication)."""
+    return read_recent(hospital_id=hospital_id, limit=limit)
+
+
+@app.get("/integrations/health")
+async def integrations_health() -> dict:
+    """Probe actual dependencies. Reports true state (up/down/not-configured)."""
+    naraya_ok = await health_check()
+    return {
+        "naraya": {
+            "connected": naraya_ok,
+            "backend": "mistral-large",
+            "hint": "Cloud AI backend for NEXUS ensemble",
+        },
+        "orthanc": {
+            "connected": False,
+            "hint": "لم يُوصَل بعد — DICOM C-STORE :11113 عند التوصيل",
+        },
+        "hl7_ris": {
+            "connected": False,
+            "hint": "لم يُوصَل — تكامل HL7 v2 مع RIS المشفى",
+        },
+        "fhir_gateway": {
+            "connected": False,
+            "hint": "لم يُوصَل — FHIR R4 ImagingStudy + DiagnosticReport",
+        },
+        "whatsapp": {
+            "connected": True,
+            "mode": "mock",
+            "hint": "Baileys محلي (mock) — يخزّن في data/whatsapp/. للإنتاج: Business API",
+        },
+        "backup": {
+            "connected": False,
+            "hint": "لم يُفعَّل — MinIO/S3 لنسخ احتياطي يومي",
+        },
+    }

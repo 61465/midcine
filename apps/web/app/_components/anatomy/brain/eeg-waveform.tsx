@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { BrainState } from './presets';
 
 // Generate a stretch of EEG samples for one channel over W local units.

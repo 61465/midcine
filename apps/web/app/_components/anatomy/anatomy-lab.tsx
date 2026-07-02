@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Heart, Wind, Brain, Droplets, Layers, Users } from 'lucide-react';
+import { Heart, Wind, Brain, Droplets, Users } from 'lucide-react';
 
 // Heart
 import { RHYTHMS, RHYTHM_LIST, type RhythmId } from './presets';
@@ -22,6 +22,7 @@ import { Filtration } from './kidney/filtration';
 import { KidneySvg } from './kidney/kidney-svg';
 // Shared
 import { BioDigitalEmbed } from './biodigital-embed';
+import { PathologyAtlas } from './pathology-atlas';
 import { VtkPlaceholder } from './vtk-placeholder';
 
 // 3D models — load client-only (WebGL)
@@ -39,7 +40,7 @@ const TABS: { id: OrganTab; label: string; icon: typeof Heart; color: string }[]
   { id: 'lungs', label: 'الرئتان', icon: Wind, color: 'text-sky-500' },
   { id: 'brain', label: 'الدماغ', icon: Brain, color: 'text-fuchsia-500' },
   { id: 'kidney', label: 'الكليتان', icon: Droplets, color: 'text-amber-500' },
-  { id: 'atlas', label: 'الأطلس التفاعلي', icon: Users, color: 'text-cyan-500' },
+  { id: 'atlas', label: 'أطلس أمراض', icon: Users, color: 'text-cyan-500' },
 ];
 
 // -----------------------------------------------------------------------------
@@ -394,14 +395,8 @@ function KidneyLab() {
 
 function AtlasLab() {
   return (
-    <div className="flex h-[calc(100vh-180px)] flex-col gap-3">
-      <div className="rounded-lg border border-cyan-200 bg-cyan-50 p-3 text-sm text-cyan-900">
-        <span className="font-semibold">أطلس تفاعلي كامل:</span> ابحث عن أي عضو، اعرض طبقات
-        (جلد/عضلات/أعضاء/شرايين)، تفاعل مع البنى بالنقر. جميع الأدوات من BioDigital مفعّلة.
-      </div>
-      <div className="flex-1 overflow-hidden rounded-lg border border-gray-200">
-        <BioDigitalEmbed />
-      </div>
+    <div className="h-[calc(100vh-180px)]">
+      <PathologyAtlas />
     </div>
   );
 }

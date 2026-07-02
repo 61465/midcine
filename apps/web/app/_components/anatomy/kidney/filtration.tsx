@@ -15,7 +15,7 @@ const STAGES = [
 
 export function Filtration({ state }: { state: KidneyState }) {
   const stage =
-    STAGES.find((s) => state.gfr >= s.min && state.gfr <= s.max) ?? STAGES[STAGES.length - 1];
+    STAGES.find((s) => state.gfr >= s.min && state.gfr <= s.max) ?? STAGES[STAGES.length - 1]!;
   const pctFromMax = Math.min(100, (state.gfr / 130) * 100);
 
   return (
