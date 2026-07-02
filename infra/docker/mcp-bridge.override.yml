@@ -1,0 +1,39 @@
+# mcp-bridge override — layers onto docker-compose.dev.yml
+# Usage:
+#   docker compose -f infra/docker/docker-compose.dev.yml \
+#                  -f infra/docker/mcp-bridge.override.yml --env-file .env up -d mcp-bridge
+#
+# The bridge calls the NEXUS backend directly (Naraya mistral-large) via HTTPS.
+# `host.docker.internal:host-gateway` is kept for future NEXUS MCP HTTP shim on host:8600.
+
+name: midcine
+
+services:
+  mcp-bridge:
+    build:
+      context: ../../services/mcp-bridge
+      dockerfile: Dockerfile
+    container_name: midcine-mcp-bridge
+    ports:
+      - '8210:8210'
+    environment:
+      NARAYA_API_KEY: ${NARAYA_API_KEY:?NARAYA_API_KEY missing — set in User env or .env}
+      NARAYA_BASE: ${NARAYA_BASE:-https://router.bynara.id/v1}
+      NARAYA_MODEL: ${NARAYA_MODEL:-mistral-large}
+      # future — NEXUS MCP HTTP shim on host
+      NEXUS_MCP_URL: ${NEXUS_MCP_URL:-http://host.docker.internal:8600}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request; urllib.request.urlopen('http://localhost:8210/health', timeout=3)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+    restart: unless-stopped
+    networks: [midcine]

@@ -105,3 +105,10 @@ fixtures/*.dcm
 
 # Archived
 apps/web-archived/
+
+# mcp-bridge runtime + venv
+services/mcp-bridge/data/
+services/mcp-bridge/.venv/
+
+# Naraya architect output
+naraya-out/

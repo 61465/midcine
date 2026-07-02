@@ -1,0 +1,51 @@
+# Traefik dynamic middlewares — borrowed from D:\project\luffy-server\traefik\dynamic\middlewares.yml
+# Adapted for midcine edge box: web (:3000) + mcp-bridge (:8210) + Orthanc (:8042).
+# Load via traefik file provider on the edge NUC.
+#
+# Usage: place this in /etc/traefik/dynamic/ on the edge box and Traefik will pick it up automatically.
+
+http:
+  middlewares:
+    # Security headers — HSTS + XSS + referrer policy. Compliant with midcine ADR-009 (Edge-First Security).
+    midcine-secure-headers:
+      headers:
+        sslRedirect: true
+        forceSTSHeader: true
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: 'strict-origin-when-cross-origin'
+        # CSP — allow inline styles for Tailwind runtime but block scripts from other origins
+        contentSecurityPolicy: >
+          default-src 'self';
+          script-src 'self' 'unsafe-inline';
+          style-src 'self' 'unsafe-inline';
+          img-src 'self' data: blob:;
+          connect-src 'self' https://ame.tail19ddab.ts.net;
+          font-src 'self' data:;
+          frame-src 'self' https://human.biodigital.com;
+
+    # Rate limit on /api/mcp/* — protects bridge from runaway callers
+    midcine-rate-limit-api:
+      rateLimit:
+        average: 30
+        burst: 15
+        period: 1m
+
+    # Gzip
+    midcine-gzip:
+      compress: {}
+
+    # Basic auth for Orthanc admin UI (until Sprint 6 puts it behind Authelia/Lucia)
+    # Generate: htpasswd -nB radiologist
+    midcine-orthanc-auth:
+      basicAuth:
+        users:
+          - '${ORTHANC_ADMIN_USER}'
+
+    # Strip trailing slash on /api paths to keep FastAPI routing clean
+    midcine-strip-api:
+      stripPrefix:
+        prefixes:
+          - '/api/mcp'

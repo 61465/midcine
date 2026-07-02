@@ -4,46 +4,53 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --primary: 199 89% 48%;
-    --primary-foreground: 0 0% 100%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --border: 214 32% 91%;
-    --ring: 199 89% 48%;
-    --radius: 0.5rem;
+    /* Luxury medical palette — navy + gold */
+    --background: 216 33% 97%;           /* #F4F6F9 */
+    --foreground: 217 33% 17%;           /* #1E293B */
+    --card: 0 0% 100%;                   /* #FFFFFF */
+    --card-foreground: 217 33% 17%;
+    --primary: 218 66% 12%;              /* #0A1931 primary navy */
+    --primary-foreground: 40 42% 56%;    /* gold on navy */
+    --secondary: 218 60% 21%;            /* #15305B teal */
+    --secondary-foreground: 0 0% 100%;
+    --accent: 40 42% 56%;                /* #C5A059 accent gold */
+    --accent-foreground: 218 66% 12%;
+    --accent-light: 40 46% 76%;          /* #DFCDA6 */
+    --muted: 216 20% 96%;
+    --muted-foreground: 215 16% 47%;     /* #64748B */
+    --border: 214 32% 91%;               /* #E2E8F0 */
+    --ring: 40 42% 56%;                  /* gold ring */
+    --radius: 0.75rem;
+    --success: 160 84% 39%;              /* #10B981 */
   }
 
   .dark {
-    --background: 222 47% 8%;
+    --background: 218 66% 12%;
     --foreground: 0 0% 98%;
-    --card: 222 47% 11%;
+    --card: 218 60% 15%;
     --card-foreground: 0 0% 98%;
-    --primary: 199 89% 58%;
-    --primary-foreground: 222 47% 8%;
-    --muted: 215 28% 17%;
-    --muted-foreground: 215 16% 65%;
-    --border: 215 28% 17%;
-    --ring: 199 89% 58%;
+    --primary: 40 42% 56%;
+    --primary-foreground: 218 66% 12%;
+    --secondary: 218 60% 21%;
+    --secondary-foreground: 0 0% 98%;
+    --accent: 40 46% 76%;
+    --accent-foreground: 218 66% 12%;
+    --muted: 218 40% 18%;
+    --muted-foreground: 215 20% 65%;
+    --border: 218 30% 25%;
+    --ring: 40 42% 56%;
   }
 
   html[dir='rtl'] {
-    font-family: var(--font-arabic, 'IBM Plex Sans Arabic'), system-ui, sans-serif;
+    font-family: 'Tajawal', 'IBM Plex Sans Arabic', system-ui, sans-serif;
   }
-
   html[dir='ltr'] {
-    font-family: var(--font-latin, 'IBM Plex Sans'), system-ui, sans-serif;
+    font-family: 'Tajawal', 'IBM Plex Sans', system-ui, sans-serif;
   }
-
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: 'kern', 'liga';
   }
-
-  /* Arabic-Hindi numerals when in Arabic context */
   .arabic-numerals {
     font-variant-numeric: normal;
     font-feature-settings: 'ss01';
@@ -54,4 +61,98 @@
   .midcine-focus-ring {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
+
+  /* Luxury button — navy → gold on hover */
+  .btn-luxury {
+    @apply inline-flex items-center gap-2 rounded-xl px-6 py-3 font-bold text-white transition-all;
+    background: linear-gradient(135deg, #0A1931, #15305B);
+    box-shadow: 0 4px 15px rgba(10, 25, 49, 0.2);
+  }
+  .btn-luxury:hover {
+    background: linear-gradient(135deg, #C5A059, #B8913E);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(197, 160, 89, 0.3);
+  }
+
+  /* Glass panel with backdrop blur */
+  .panel-glass {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  }
+
+  /* Card with gold top-accent on hover */
+  .card-luxury {
+    @apply relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+  .card-luxury::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #C5A059, #DFCDA6);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .card-luxury:hover {
+    transform: translateY(-4px);
+    border-color: rgba(197, 160, 89, 0.3);
+    box-shadow: 0 25px 50px -12px rgba(10, 25, 49, 0.12);
+  }
+  .card-luxury:hover::before {
+    opacity: 1;
+  }
+
+  /* Section label with gold divider lines */
+  .section-label {
+    @apply inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest;
+    color: #C5A059;
+  }
+  .section-label::before,
+  .section-label::after {
+    content: '';
+    width: 30px;
+    height: 1px;
+    background: #C5A059;
+    opacity: 0.5;
+  }
+
+  /* Trust/stats bar dark navy with gold accent lines */
+  .stats-bar-dark {
+    background: linear-gradient(135deg, #0A1931 0%, #0D2240 50%, #15305B 100%);
+    color: white;
+    position: relative;
+  }
+  .stats-bar-dark::before,
+  .stats-bar-dark::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #C5A059, transparent);
+  }
+  .stats-bar-dark::before { top: 0; }
+  .stats-bar-dark::after { bottom: 0; }
+
+  /* Text gradient (navy → gold) */
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #C5A059, #E8D5A8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
+
+/* Scrollbar in gold */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #F4F6F9; }
+::-webkit-scrollbar-thumb {
+  background: #C5A059;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover { background: #0A1931; }

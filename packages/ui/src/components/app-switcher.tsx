@@ -1,3 +1,5 @@
+'use client';
+
 import * as React from 'react';
 import { Grid3x3 } from 'lucide-react';
 import { cn } from '../lib/cn';
@@ -35,7 +37,7 @@ export function AppSwitcher({ apps, currentAppId, className }: AppSwitcherProps)
 
       {open && (
         <div
-          className="absolute end-0 top-full z-50 mt-2 w-80 rounded-lg border bg-card p-3 shadow-lg"
+          className="bg-card absolute end-0 top-full z-50 mt-2 w-80 rounded-lg border p-3 shadow-lg"
           role="menu"
         >
           <div className="grid grid-cols-3 gap-2">
@@ -44,15 +46,15 @@ export function AppSwitcher({ apps, currentAppId, className }: AppSwitcherProps)
                 key={app.id}
                 href={app.url}
                 className={cn(
-                  'group relative flex flex-col items-center gap-2 rounded-md p-3 text-center transition-colors hover:bg-muted',
+                  'hover:bg-muted group relative flex flex-col items-center gap-2 rounded-md p-3 text-center transition-colors',
                   app.id === currentAppId && 'bg-muted',
                 )}
                 role="menuitem"
               >
-                <app.icon className="h-6 w-6 text-brand-600" />
+                <app.icon className="text-brand-600 h-6 w-6" />
                 <span className="text-xs font-medium">{app.nameAr}</span>
                 {app.badge && app.badge > 0 && (
-                  <span className="absolute end-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-priority-p1 text-xs text-white">
+                  <span className="bg-priority-p1 absolute end-1 top-1 flex h-5 w-5 items-center justify-center rounded-full text-xs text-white">
                     {app.badge > 9 ? '٩+' : app.badge}
                   </span>
                 )}
