@@ -22,7 +22,7 @@ http:
           script-src 'self' 'unsafe-inline';
           style-src 'self' 'unsafe-inline';
           img-src 'self' data: blob:;
-          connect-src 'self' https://ame.tail19ddab.ts.net;
+          connect-src 'self';
           font-src 'self' data:;
           frame-src 'self' https://human.biodigital.com;
 

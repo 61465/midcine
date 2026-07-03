@@ -61,7 +61,7 @@ if (Test-Path $tailscale) {
 # 5) Print success
 Write-Host ""
 Write-Host "[5/5] OK — midcine edge live" -ForegroundColor Green
-Write-Host "  Web UI         : https://ame.tail19ddab.ts.net:$funnelPort" -ForegroundColor Cyan
+Write-Host "  Web UI         : http://localhost:3000  (midcine is local-only)" -ForegroundColor Cyan
 Write-Host "  Local Caddy    : https://localhost:8443" -ForegroundColor Cyan
 Write-Host "  Orthanc direct : http://localhost:8042" -ForegroundColor Cyan
 Write-Host "  MinIO console  : http://localhost:9001" -ForegroundColor Cyan

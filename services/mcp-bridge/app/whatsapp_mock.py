@@ -61,7 +61,9 @@ class SendReportRequest(BaseModel):
     attach_pdf: bool = True
     attach_dicom_sr: bool = True
     include_share_links: bool = True
-    base_url: str = "https://ame.tail19ddab.ts.net:8445"
+    # midcine runs local-only. Override per-hospital when deploying to an edge box
+    # (e.g. https://midcine.hospital-a.local).
+    base_url: str = "http://localhost:3000"
 
 
 def _month_file() -> Path:

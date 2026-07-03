@@ -1,7 +1,7 @@
 # midcine — Hospital Pitch
 
 **نظام RIS/PACS عربي أوّل من الشرق الأوسط للشرق الأوسط**
-منشور حيّ: https://ame.tail19ddab.ts.net:8445
+منشور حيّ: http://localhost:3000
 
 ---
 
@@ -76,6 +76,6 @@ RTL native · مصطلحات ACR معتمدة · تقرير عربي منظّم 
 
 ## التواصل
 
-- **الويب:** https://ame.tail19ddab.ts.net:8445
-- **API demo:** https://ame.tail19ddab.ts.net:8445/reader/1.2.3.STUDY.0002
+- **الويب:** http://localhost:3000
+- **API demo:** http://localhost:3000/reader/1.2.3.STUDY.0002
 - **الشركاء الحاليون:** مستشفى الجامعة (Pilot)

@@ -27,12 +27,14 @@ const https = require('https');
 const WEB_URL = process.env.MIDCINE_WEB_URL || 'http://localhost:3000';
 const BRIDGE_URL = process.env.MIDCINE_BRIDGE_URL || 'http://localhost:8210';
 const ORTHANC_URL = process.env.MIDCINE_ORTHANC_URL || 'http://localhost:8042';
-const PUBLIC_URL = process.env.MIDCINE_PUBLIC_URL || 'https://ame.tail19ddab.ts.net:8445';
+// midcine is local-only. Set MIDCINE_PUBLIC_URL only if you've deployed to an
+// edge box with an internal hospital hostname.
+const PUBLIC_URL = process.env.MIDCINE_PUBLIC_URL || '';
 const INTERVAL = parseInt(process.env.MIDCINE_INTERVAL_SEC || '60', 10) * 1000;
 const LOG_DIR = process.env.MIDCINE_LOG_DIR || path.join(__dirname, '..', 'logs');
 const ALERT_LAT = parseInt(process.env.MIDCINE_ALERT_LATENCY_MS || '1500', 10);
 const SKIP_ORTHANC = process.env.MIDCINE_SKIP_ORTHANC === '1';
-const SKIP_PUBLIC = process.env.MIDCINE_SKIP_PUBLIC === '1';
+const SKIP_PUBLIC = process.env.MIDCINE_SKIP_PUBLIC === '1' || !PUBLIC_URL;
 
 if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
 

@@ -2,7 +2,7 @@
 
 **التاريخ:** 2026-07-02
 **الحالة:** جاهز للعرض على المشفى (Sprint 1 مكتمل)
-**الرابط الحيّ:** https://ame.tail19ddab.ts.net:8445
+**الرابط الحيّ:** http://localhost:3000
 **آخر commit:** `62f181d` + جولة تنظيف البيانات الوهمية
 
 ---
@@ -41,7 +41,7 @@
 └────────────────────────────────────────────────────────────────┘
                               ↓
 ┌────────────────────────────────────────────────────────────────┐
-│   Tailscale Funnel — https://ame.tail19ddab.ts.net:8445         │
+│   Local only — http://localhost:3000                            │
 └────────────────────────────────────────────────────────────────┘
 ```
 
@@ -201,7 +201,7 @@
 
 ### 7.1 Backend health
 ```
-$ curl https://ame.tail19ddab.ts.net:8445/api/mcp/pipeline (GET)
+$ curl http://localhost:3000/api/mcp/pipeline (GET)
 {"status":"ok","service":"mcp-bridge","backend":"naraya-mistral-large","backend_reachable":true}
 ```
 
@@ -281,7 +281,7 @@ persisted to data/whatsapp/2026-07.jsonl
 
 - **الكود:** كل المستودع `D:\project\midcine\` (open-source-core Apache 2.0)
 - **الوثائق:** `docs/` (13 وثيقة)
-- **العرض الحيّ:** https://ame.tail19ddab.ts.net:8445
+- **العرض الحيّ:** http://localhost:3000
 - **العرض التقني:** demo script في `docs/DEMO-SCRIPT.md`
 - **الرد على الاعتراضات:** `docs/OBJECTIONS.md`
 - **المرجع المعماري:** `docs/adr/ADR-008` إلى `ADR-011`

@@ -10,7 +10,8 @@
 #    MINIO_ROOT_PASSWORD     — minio admin password (>= 8 chars)
 #    ORTHANC_PASSWORD        — orthanc REST password
 #    HOSPITAL_ID             — e.g. "hosp-001"
-#    CLOUD_BROKER_URL        — e.g. "https://ame.tail19ddab.ts.net:8444"
+#    CLOUD_BROKER_URL        — leave empty for pilot (local-only). When set,
+#                              points to the per-hospital cloud index broker.
 #    EDGE_DATA_ROOT          — e.g. "E:/midcine-edge-data"
 # ═══════════════════════════════════════════════════════════════
 
@@ -34,9 +35,9 @@ services:
       - ${EDGE_DATA_ROOT:-E:/midcine-edge-data}/postgres:/var/lib/postgresql/data
       - ../sql/migrations:/docker-entrypoint-initdb.d:ro
     ports:
-      - "5432:5432"
+      - '5432:5432'
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U midcine -d midcine"]
+      test: ['CMD-SHELL', 'pg_isready -U midcine -d midcine']
       interval: 30s
       timeout: 5s
       retries: 3
@@ -50,13 +51,13 @@ services:
     image: redis:7-alpine
     container_name: midcine-edge-redis
     restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes"]
+    command: ['redis-server', '--appendonly', 'yes']
     volumes:
       - ${EDGE_DATA_ROOT:-E:/midcine-edge-data}/redis:/data
     ports:
-      - "6379:6379"
+      - '6379:6379'
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 30s
       timeout: 3s
       retries: 3
@@ -76,10 +77,10 @@ services:
     volumes:
       - ${EDGE_DATA_ROOT:-E:/midcine-edge-data}/minio:/data
     ports:
-      - "9000:9000"   # S3 API
-      - "9001:9001"   # web console
+      - '9000:9000' # S3 API
+      - '9001:9001' # web console
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
       interval: 30s
       timeout: 5s
       retries: 3
@@ -93,8 +94,8 @@ services:
     container_name: midcine-edge-orthanc
     restart: unless-stopped
     environment:
-      ORTHANC__POSTGRESQL__ENABLE_INDEX: "true"
-      ORTHANC__POSTGRESQL__ENABLE_STORAGE: "false"  # storage stays in MinIO
+      ORTHANC__POSTGRESQL__ENABLE_INDEX: 'true'
+      ORTHANC__POSTGRESQL__ENABLE_STORAGE: 'false' # storage stays in MinIO
       ORTHANC__POSTGRESQL__HOST: postgres
       ORTHANC__POSTGRESQL__PORT: 5432
       ORTHANC__POSTGRESQL__DATABASE: midcine
@@ -106,13 +107,13 @@ services:
     volumes:
       - ${EDGE_DATA_ROOT:-E:/midcine-edge-data}/orthanc:/var/lib/orthanc/db
     ports:
-      - "8042:8042"   # REST + Web UI + DICOMweb
-      - "11112:4242"  # DICOM C-STORE (standard Orthanc port)
+      - '8042:8042' # REST + Web UI + DICOMweb
+      - '11112:4242' # DICOM C-STORE (standard Orthanc port)
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "-u", "admin:${ORTHANC_PASSWORD}", "http://localhost:8042/system"]
+      test: ['CMD', 'curl', '-f', '-u', 'admin:${ORTHANC_PASSWORD}', 'http://localhost:8042/system']
       interval: 30s
       timeout: 5s
       retries: 3
@@ -136,12 +137,12 @@ services:
       ORTHANC_USER: admin
       ORTHANC_PASSWORD: ${ORTHANC_PASSWORD}
     ports:
-      - "11113:11113"
+      - '11113:11113'
     depends_on:
       orthanc:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 11113 || exit 1"]
+      test: ['CMD-SHELL', 'nc -z localhost 11113 || exit 1']
       interval: 30s
       timeout: 5s
       retries: 3
@@ -182,8 +183,8 @@ services:
       - ./Caddyfile.edge:/etc/caddy/Caddyfile:ro
       - ${EDGE_DATA_ROOT:-E:/midcine-edge-data}/caddy:/data
     ports:
-      - "8443:443"
-      - "8080:80"
+      - '8443:443'
+      - '8080:80'
     depends_on:
       orthanc:
         condition: service_healthy

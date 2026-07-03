@@ -9,7 +9,8 @@ $logDir     = Join-Path $root 'logs'
 $intervalS  = 60
 $webUrl     = 'http://localhost:3000/'
 $bridgeUrl  = 'http://localhost:8210/health'
-$publicUrl  = 'https://ame.tail19ddab.ts.net:8445/'
+# midcine is local-only. No public URL probe.
+$publicUrl  = ''
 
 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
 $logFile = Join-Path $logDir ("watchdog-{0}.log" -f (Get-Date -Format 'yyyyMMdd'))
@@ -33,12 +34,10 @@ Write-Log "watchdog START — interval=${intervalS}s"
 while ($true) {
     $web    = Probe $webUrl
     $bridge = Probe $bridgeUrl
-    $pub    = Probe $publicUrl
 
-    $summary = "web={0} bridge={1} pub={2}" -f `
+    $summary = "web={0} bridge={1}" -f `
         ($(if($web.ok)   {"OK"} else {"DOWN($($web.code))"})),
-        ($(if($bridge.ok){"OK"} else {"DOWN($($bridge.code))"})),
-        ($(if($pub.ok)   {"OK"} else {"DOWN($($pub.code))"}))
+        ($(if($bridge.ok){"OK"} else {"DOWN($($bridge.code))"}))
     Write-Log $summary
 
     if (-not $web.ok) {

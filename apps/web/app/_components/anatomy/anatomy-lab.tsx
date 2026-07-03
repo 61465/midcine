@@ -256,12 +256,6 @@ function LungsLab() {
             <LungsSvg state={st} rr={rr} />
           </div>
         </div>
-        <div className="h-[360px] overflow-hidden rounded-lg border border-gray-200">
-          <BioDigitalEmbed compact />
-        </div>
-        <div className="h-[360px] overflow-hidden rounded-lg border border-gray-200">
-          <VtkPlaceholder />
-        </div>
       </div>
     </div>
   );

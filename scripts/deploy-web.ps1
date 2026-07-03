@@ -1,15 +1,15 @@
-# midcine web deploy — mobeface pattern adapted (borrowed from D:\project\mobeface\start-backend.ps1)
-# Builds apps/web, starts on :3000 in background, opens Tailscale Funnel on :8445, verifies.
-# Idempotent: kills existing process on 3000 first, resets funnel first.
+# midcine web — local build + start on :3000. NO tailscale funnel.
 #
+# The Tailscale Funnel ame.tail19ddab.ts.net:8445 is reserved for thawani-v2.
+# midcine is local-only during pilot. Access via http://localhost:3000.
+#
+# Idempotent: kills existing :3000 process first.
 # Run: powershell -ExecutionPolicy Bypass -File D:\project\midcine\scripts\deploy-web.ps1
 $ErrorActionPreference = 'Stop'
 
 $root       = 'D:\project\midcine'
 $webFilter  = '@midcine/web'
 $localPort  = 3000
-$funnelPort = 8445
-$tailscale  = 'C:\Program Files\Tailscale\tailscale.exe'
 
 Set-Location $root
 
@@ -23,7 +23,7 @@ Get-NetTCPConnection -LocalPort $localPort -State Listen -ErrorAction SilentlyCo
     }
 Start-Sleep -Seconds 1
 
-# 2) Build (Next.js production)
+# 2) Build
 Write-Host "== Building $webFilter ==" -ForegroundColor Cyan
 pnpm --filter $webFilter build
 if ($LASTEXITCODE -ne 0) {
@@ -31,13 +31,13 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# 3) Start in background
+# 3) Start production server
 Write-Host "== Starting web on http://localhost:$localPort ==" -ForegroundColor Cyan
 $logDir = Join-Path $root 'logs'
 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
-$logFile = Join-Path $logDir "web-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
+$logFile = Join-Path $logDir ("web-{0}.log" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
 
-# Windows: pnpm is a .cmd shim, must be invoked via cmd.exe so Start-Process can find it.
+# Windows: pnpm is a .cmd shim, invoke via cmd.exe.
 $proc = Start-Process -FilePath 'cmd.exe' `
     -ArgumentList '/c', 'pnpm', '--filter', $webFilter, 'start', '--', '-p', $localPort `
     -WorkingDirectory $root `
@@ -68,38 +68,13 @@ try {
     $h = Invoke-RestMethod 'http://localhost:8210/health' -TimeoutSec 5 -ErrorAction Stop
     Write-Host "  bridge status=$($h.status) backend=$($h.backend) reachable=$($h.backend_reachable)" -ForegroundColor Green
 } catch {
-    Write-Warning "  mcp-bridge NOT UP — reader will surface bridge_unreachable. Run scripts\start-mcp-bridge.ps1 in another window."
-}
-
-# 6) Reset + open Tailscale Funnel
-if (-not (Test-Path $tailscale)) {
-    Write-Error "Tailscale CLI not at $tailscale"
-    exit 1
-}
-Write-Host "== Resetting Tailscale Funnel on :$funnelPort ==" -ForegroundColor Cyan
-& $tailscale funnel --https=$funnelPort off 2>$null | Out-Null
-& $tailscale funnel --bg --https=$funnelPort --set-path=/ "http://localhost:$localPort"
-
-Start-Sleep -Seconds 2
-
-# 7) Verify public URL
-$publicUrl = "https://ame.tail19ddab.ts.net:$funnelPort"
-Write-Host "== Verifying $publicUrl ==" -ForegroundColor Cyan
-try {
-    $r = Invoke-WebRequest $publicUrl -TimeoutSec 10 -UseBasicParsing -ErrorAction Stop
-    Write-Host "  public OK ($($r.StatusCode))" -ForegroundColor Green
-} catch {
-    Write-Warning "  public probe failed: $_"
+    Write-Warning "  mcp-bridge NOT UP — reader will surface bridge_unreachable. Run scripts\start-mcp-bridge.ps1."
 }
 
 Write-Host ""
 Write-Host "===============================================" -ForegroundColor Green
-Write-Host "  midcine v3 LIVE" -ForegroundColor Green
-Write-Host "  public : $publicUrl" -ForegroundColor Cyan
-Write-Host "  local  : http://localhost:$localPort" -ForegroundColor Cyan
-Write-Host "  bridge : http://localhost:8210 (health, dispatch, aggregate, pipeline)" -ForegroundColor Cyan
+Write-Host "  midcine LOCAL — no external URL" -ForegroundColor Green
+Write-Host "  web    : http://localhost:$localPort" -ForegroundColor Cyan
+Write-Host "  bridge : http://localhost:8210" -ForegroundColor Cyan
 Write-Host "  logs   : $logFile" -ForegroundColor DarkGray
 Write-Host "===============================================" -ForegroundColor Green
-Write-Host ""
-Write-Host "== Funnel status ==" -ForegroundColor Cyan
-& $tailscale funnel status

@@ -32,6 +32,7 @@ from .report import (
     generate_from_aggregate,
     sign_report,
 )
+from .reports_store import load_report, save_report
 from .schemas import (
     AggregateRequest,
     AggregateResponse,
@@ -70,7 +71,9 @@ app = FastAPI(title="midcine mcp-bridge", version="0.2.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://ame.tail19ddab.ts.net"],
+    # midcine is local-only during pilot; expand this list per-hospital when
+    # deploying to an on-prem edge box with a hospital-specific hostname.
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=False,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
@@ -206,8 +209,9 @@ def report_generate(req: GenerateRequest) -> FinalReport:
 
 @app.post("/report/sign", response_model=FinalReport)
 def report_sign(req: SignRequest) -> FinalReport:
-    """Stamp the report with radiologist name + license + timestamp."""
+    """Stamp with radiologist + license + timestamp. Persist so share links can retrieve."""
     signed = sign_report(req)
+    save_report(signed)
     audit(
         action="report.sign",
         tenant=signed.hospital_id,
@@ -216,6 +220,44 @@ def report_sign(req: SignRequest) -> FinalReport:
         meta={"license_no": signed.license_no},
     )
     return signed
+
+
+@app.get("/reports/{study_uid}", response_model=FinalReport | None)
+def report_get(study_uid: str) -> FinalReport | None:
+    """Retrieve a persisted signed report by study_uid."""
+    return load_report(study_uid)
+
+
+@app.get("/reports/{study_uid}/pdf")
+def report_pdf_get(study_uid: str) -> Response:
+    """Return the PDF of a persisted report, or 404."""
+    rpt = load_report(study_uid)
+    if rpt is None:
+        return Response(status_code=404, content=b"Report not found")
+    data = build_pdf(rpt)
+    return Response(
+        content=data,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": (f'inline; filename="report-{study_uid[-12:]}.pdf"'),
+        },
+    )
+
+
+@app.get("/reports/{study_uid}/sr")
+def report_sr_get(study_uid: str) -> Response:
+    """Return the DICOM SR of a persisted report, or 404."""
+    rpt = load_report(study_uid)
+    if rpt is None:
+        return Response(status_code=404, content=b"Report not found")
+    data = encode_sr(rpt)
+    return Response(
+        content=data,
+        media_type="application/dicom",
+        headers={
+            "Content-Disposition": (f'attachment; filename="report-{study_uid[-12:]}.dcm"'),
+        },
+    )
 
 
 @app.post("/whatsapp/send", response_model=WhatsAppMessage)

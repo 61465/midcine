@@ -19,7 +19,7 @@ CONTEXT:
 - New: infra/docker/edge-bundle.yml exists for on-prem NUC
 - apps/web SHIPPED: 7 routes + /anatomy lab (4 organs 3D+SVG+waveform + BioDigital atlas). React 19 + Next 15 (webpack), Tailwind 3.4, @midcine/ui with 17 components
 - NEXUS-AI (46 agents) sits at D:\project\suportagent, exposes MCP server. Agent names include: vision_ai, clinical_llm, guardian, algorithm_expert, code_reviewer, architect, devops_master, etc.
-- Deploy target: Tailscale Funnel at ame.tail19ddab.ts.net (already used for mobeface + smartfleet on ports 8443/8444)
+- Deploy target: local-only (http://localhost:3000). The Tailscale Funnel ame.tail19ddab.ts.net belongs to thawani-v2; midcine must not share it. Future edge deployments create per-hospital hostnames.
 
 PHILOSOPHY (6 principles, non-negotiable):
 1. NEXUS-AI is the AI brain — mcp-bridge must be a thin bridge, no local model logic
