@@ -23,6 +23,7 @@ from .audit import audit, read_recent
 from .dicom_sr import encode_sr, encode_sr_dict
 from .dispatcher import Dispatcher
 from .hl7_oru import OruSendError, build_oru, send_oru
+from .pdf_report import build_pdf
 from .phi_redactor import redact_study_prompt
 from .report import (
     FinalReport,
@@ -40,6 +41,7 @@ from .schemas import (
     PipelineRequest,
     PipelineResponse,
 )
+from .share_links import verify as verify_share_token
 from .studies_store import (
     PatientRecord,
     StudyRecord,
@@ -287,6 +289,40 @@ def report_sr_download(req: SrRequest) -> Response:
         meta={"bytes": len(data)},
     )
     return Response(content=data, media_type="application/dicom")
+
+
+@app.post("/report/pdf")
+def report_pdf_download(req: SrRequest) -> Response:
+    """Render FinalReport to Arabic RTL PDF and return as application/pdf."""
+    data = build_pdf(req.report)
+    audit(
+        action="report.pdf.built",
+        tenant=req.report.hospital_id,
+        target={"type": "study", "id": req.report.study_uid},
+        meta={"bytes": len(data)},
+    )
+    return Response(
+        content=data,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": (f'inline; filename="report-{req.report.study_uid[-12:]}.pdf"'),
+        },
+    )
+
+
+@app.get("/share/{token}")
+def share_resolve(token: str) -> dict:
+    """Verify + describe a shareable link token. Web layer redirects using this."""
+    payload = verify_share_token(token)
+    if not payload:
+        return {"ok": False, "error": "invalid or expired token"}
+    return {
+        "ok": True,
+        "study_uid": payload["sid"],
+        "kind": payload["k"],
+        "recipient": payload.get("r", ""),
+        "expires_at": payload["exp"],
+    }
 
 
 @app.get("/whatsapp/messages")
