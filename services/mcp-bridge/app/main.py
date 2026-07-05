@@ -9,15 +9,17 @@ Endpoints:
 
 from __future__ import annotations
 
+import json
 import logging
 import time
 from pathlib import Path
 
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from .agents_client import fan_out, health_check
+from .agents_client import fan_out, fan_out_stream, health_check
 from .aggregator import aggregate
 from .audit import audit, read_recent
 from .dicom_sr import encode_sr, encode_sr_dict
@@ -186,6 +188,89 @@ async def pipeline(req: PipelineRequest) -> PipelineResponse:
         outputs=outputs,
         aggregate=agg,
         total_latency_ms=total_ms,
+    )
+
+
+@app.post("/pipeline/stream")
+async def pipeline_stream(req: PipelineRequest) -> StreamingResponse:
+    """SSE stream — emits each agent's output as it finishes.
+
+    Event schema:
+      event: dispatched  data: {"agents": [...]}
+      event: agent_done  data: {AgentOutput dict}
+      event: aggregate   data: {AggregateResponse dict}
+      event: done        data: {"total_latency_ms": N}
+    """
+    started = time.perf_counter()
+    agents, _matched = _dispatcher.match(req.study)
+    tenant = req.study.hospital_id or "default"
+
+    user_prompt, redaction_map = redact_study_prompt(
+        modality=req.study.modality,
+        body_part=req.study.body_part,
+        patient_name=req.study.patient_name,
+        patient_id=req.study.patient_id,
+        age=None,
+        sex=None,
+        clinical_context=req.study.clinical_context,
+    )
+
+    log.info(
+        "pipeline/stream START tenant=%s study=%s agents=%s phi_redactions=%d",
+        tenant,
+        req.study.study_uid,
+        agents,
+        len(redaction_map),
+    )
+    audit(
+        action="pipeline.stream.start",
+        tenant=tenant,
+        target={"type": "study", "id": req.study.study_uid},
+        meta={
+            "modality": req.study.modality,
+            "body_part": req.study.body_part,
+            "agents": agents,
+            "phi_redactions": len(redaction_map),
+        },
+    )
+
+    async def event_gen():
+        yield f"event: dispatched\ndata: {json.dumps({'agents': agents, 'study_uid': req.study.study_uid})}\n\n"
+
+        q = await fan_out_stream(agents, user_prompt)
+        outputs: list = []
+        while True:
+            item = await q.get()
+            if item is None:
+                break
+            outputs.append(item)
+            yield f"event: agent_done\ndata: {item.model_dump_json()}\n\n"
+
+        agg = aggregate(
+            AggregateRequest(study_uid=req.study.study_uid, outputs=outputs),
+            body_part=req.study.body_part,
+        )
+        yield f"event: aggregate\ndata: {agg.model_dump_json()}\n\n"
+
+        total_ms = (time.perf_counter() - started) * 1000
+        audit(
+            action="pipeline.stream.end",
+            tenant=tenant,
+            target={"type": "study", "id": req.study.study_uid},
+            ok=all(o.ok for o in outputs),
+            meta={
+                "total_latency_ms": int(total_ms),
+                "consensus": round(agg.overall_confidence, 3),
+                "outputs_ok": sum(1 for o in outputs if o.ok),
+                "outputs_total": len(outputs),
+            },
+        )
+        yield f"event: done\ndata: {json.dumps({'total_latency_ms': total_ms})}\n\n"
+
+    return StreamingResponse(
+        event_gen(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
 

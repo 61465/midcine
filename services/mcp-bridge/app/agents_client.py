@@ -170,6 +170,28 @@ async def fan_out(agents: list[str], user_prompt: str) -> list[AgentOutput]:
     return await asyncio.gather(*tasks)
 
 
+async def fan_out_stream(agents: list[str], user_prompt: str) -> asyncio.Queue[AgentOutput | None]:
+    """Fire all agents in parallel and stream results as each finishes.
+
+    Returns an asyncio.Queue that yields each AgentOutput as it becomes ready,
+    then a final `None` sentinel. The caller drives the loop.
+    """
+    q: asyncio.Queue[AgentOutput | None] = asyncio.Queue()
+
+    async def _run(agent: str) -> None:
+        out = await call_agent(agent, user_prompt)
+        await q.put(out)
+
+    async def _driver() -> None:
+        await asyncio.gather(*(_run(a) for a in agents))
+        await q.put(None)  # sentinel
+
+    # Retain a strong reference on the queue itself so the task survives GC.
+    task = asyncio.create_task(_driver())
+    q._midcine_driver = task  # type: ignore[attr-defined]
+    return q
+
+
 def _health_check_sync() -> bool:
     try:
         with httpx.Client(timeout=10) as client:

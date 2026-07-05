@@ -9,6 +9,7 @@ import { SavingsCounter } from './savings-counter';
 import { VoiceDictate } from './voice-dictate';
 import { RoomShortcuts } from './room-shortcuts';
 import { HelpOverlay } from './help-overlay';
+import { TrialBanner } from '../auth/trial-banner';
 import { DicomViewer } from '../dicom-viewer-loader';
 import { fetchStudies, type Study } from '../../../lib/studies';
 import type { StudyMetadata } from '../../../lib/mcp';
@@ -84,6 +85,7 @@ export function ReadingRoom() {
           <span className="text-[10px] uppercase tracking-widest text-cyan-400">Reading Room</span>
         </div>
         <div className="flex items-center gap-2">
+          <TrialBanner />
           <SavingsCounter compact />
           <button
             type="button"

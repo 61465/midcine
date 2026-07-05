@@ -2,8 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Sparkles, Loader2, PenLine, Send, ChevronDown, Wand2 } from 'lucide-react';
-import type { PipelineResponse, StudyMetadata } from '../../../lib/mcp';
-import { runPipeline } from '../../../lib/mcp';
+import type {
+  AgentOutput,
+  AggregateResponse,
+  PipelineResponse,
+  StudyMetadata,
+} from '../../../lib/mcp';
+import { streamPipeline } from '../../../lib/mcp';
 import {
   generateReport,
   signReport,
@@ -56,7 +61,7 @@ function saveDraft(uid: string, sections: ReportSection[]) {
 
 type State =
   | { kind: 'idle' }
-  | { kind: 'running' }
+  | { kind: 'running'; agents: string[]; done: AgentOutput[] }
   | { kind: 'ready'; pipeline: PipelineResponse; report: FinalReport }
   | { kind: 'error'; msg: string };
 
@@ -66,22 +71,51 @@ export function ReportComposer({ study, onSigned }: Props) {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    setState({ kind: 'running' });
-    (async () => {
-      try {
-        const pipeline = await runPipeline(study);
-        const report = await generateReport(study, pipeline.aggregate, pipeline.outputs);
-        const draft = loadDraft(study.study_uid);
-        if (draft) {
-          report.sections = report.sections.map((s) =>
-            draft[s.key] != null ? { ...s, content_ar: draft[s.key]! } : s,
-          );
+    setState({ kind: 'running', agents: [], done: [] });
+    const outputs: AgentOutput[] = [];
+    let agents: string[] = [];
+    let aggregate: AggregateResponse | null = null;
+
+    const abort = streamPipeline(study, {
+      onDispatched: (a) => {
+        agents = a;
+        setState({ kind: 'running', agents: a, done: [] });
+      },
+      onAgentDone: (out) => {
+        outputs.push(out);
+        setState({ kind: 'running', agents, done: [...outputs] });
+      },
+      onAggregate: (agg) => {
+        aggregate = agg;
+      },
+      onDone: async () => {
+        if (!aggregate) {
+          setState({ kind: 'error', msg: 'no aggregate' });
+          return;
         }
-        setState({ kind: 'ready', pipeline, report });
-      } catch (e) {
-        setState({ kind: 'error', msg: String(e) });
-      }
-    })();
+        try {
+          const pipeline: PipelineResponse = {
+            study_uid: study.study_uid,
+            dispatched_agents: agents,
+            outputs,
+            aggregate,
+            total_latency_ms: 0,
+          };
+          const report = await generateReport(study, aggregate, outputs);
+          const draft = loadDraft(study.study_uid);
+          if (draft) {
+            report.sections = report.sections.map((s) =>
+              draft[s.key] != null ? { ...s, content_ar: draft[s.key]! } : s,
+            );
+          }
+          setState({ kind: 'ready', pipeline, report });
+        } catch (e) {
+          setState({ kind: 'error', msg: String(e) });
+        }
+      },
+      onError: (err) => setState({ kind: 'error', msg: err }),
+    });
+    return abort;
   }, [study.study_uid]);
 
   const report = state.kind === 'ready' ? state.report : null;
@@ -155,9 +189,42 @@ export function ReportComposer({ study, onSigned }: Props) {
       </div>
 
       {state.kind === 'running' && (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-slate-500">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-slate-500">
           <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
-          <div className="text-xs">Drafting from 4 AI agents…</div>
+          <div className="text-xs">Drafting from {state.agents.length || '…'} AI agents</div>
+          {state.agents.length > 0 && (
+            <div className="w-full max-w-xs space-y-2">
+              {state.agents.map((agent) => {
+                const done = state.done.find((d) => d.agent === agent);
+                return (
+                  <div
+                    key={agent}
+                    className={
+                      'flex items-center justify-between rounded-lg border px-3 py-2 text-[10px] transition ' +
+                      (done
+                        ? done.ok
+                          ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-300'
+                          : 'border-rose-500/30 bg-rose-500/5 text-rose-300'
+                        : 'border-slate-700 bg-slate-900/40 text-slate-500')
+                    }
+                  >
+                    <span className="font-mono">{agent}</span>
+                    <span>
+                      {done ? (
+                        done.ok ? (
+                          `✓ ${Math.round(done.latency_ms)}ms`
+                        ) : (
+                          '✗ failed'
+                        )
+                      ) : (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
