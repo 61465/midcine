@@ -1,248 +1,222 @@
 import Link from 'next/link';
-import {
-  ListChecks,
-  ScanEye,
-  Heart,
-  User,
-  Sparkles,
-  Send,
-  Settings,
-  Smartphone,
-  ArrowLeft,
-  Zap,
-  Shield,
-  Award,
-  Activity,
-} from 'lucide-react';
+import { Sparkles, Mic, Send, Zap, ArrowRight, Check, Shield, Clock, Settings } from 'lucide-react';
 
-const routes = [
+const features = [
   {
-    href: '/worklist',
-    title: 'قائمة العمل',
-    desc: 'حالات المشفى بترتيب الأولوية · فلاتر · اقتراحات AI',
-    icon: ListChecks,
+    icon: Mic,
+    title: 'Voice-to-report',
+    tag: 'Voice',
+    desc: 'Hold space and dictate. Live transcription in Arabic or English.',
   },
   {
-    href: '/worklist',
-    title: 'القارئ',
-    desc: 'DICOM viewer + NEXUS Ensemble + محرّر تقرير + توقيع + WhatsApp',
-    icon: ScanEye,
-  },
-  {
-    href: '/anatomy',
-    title: 'أطلس الأمراض',
-    desc: '21 حالة مرضية بصرية — قلب/رئتين/دماغ/كليتين + مكتبات مجانية',
-    icon: Heart,
-  },
-  {
-    href: '/worklist',
-    title: 'ملف المريض',
-    desc: 'الجدول الزمني · حساسية/أدوية · متابعة تطوّر الحالة',
-    icon: User,
-  },
-  {
-    href: '/insights',
-    title: 'الرؤى',
-    desc: 'KPIs المشفى الفعلية · متوسط زمن الـ AI · معدل الإجماع',
     icon: Sparkles,
+    title: 'Draft in 15 seconds',
+    tag: 'AI',
+    desc: '4 AI agents read the study and draft the report. You edit and sign.',
   },
   {
-    href: '/connect',
-    title: 'الاتصال',
-    desc: 'رسائل WhatsApp المُرسلة إلى الأطباء والمرضى',
     icon: Send,
-  },
-  {
-    href: '/console',
-    title: 'الإعدادات',
-    desc: 'التكاملات (Orthanc/HL7/FHIR/WhatsApp) · سجل التدقيق · الأمن',
-    icon: Settings,
-  },
-  {
-    href: '/m',
-    title: 'الجوّال',
-    desc: 'PWA للحالات الحرجة · P1/P2 · push notifications',
-    icon: Smartphone,
+    title: 'Auto-delivery',
+    tag: 'Delivery',
+    desc: 'Signed → PDF + DICOM SR straight to the referrer via WhatsApp.',
   },
 ];
 
-const trustPoints = [
-  { icon: Zap, title: 'ذكاء ensemble', desc: '46 وكيل NEXUS-AI بالتوازي' },
-  { icon: Shield, title: 'أمن edge-first', desc: 'DICOM لا يغادر المشفى' },
-  { icon: Activity, title: 'FHIR R4', desc: 'تكامل EMR/HIS جاهز' },
-  { icon: Award, title: 'RTL أصلي', desc: 'صمّم للطبيب العربي' },
-];
-
-const stats = [
-  { value: '46', suffix: 'وكيل', label: 'nexus-ai agents' },
-  { value: '15', suffix: 'خدمة', label: 'microservices' },
-  { value: '<15', suffix: 'ثانية', label: 'ensemble P95' },
-  { value: '99%', suffix: '', label: 'uptime target' },
+const includes = [
+  'Unlimited reports',
+  'Voice dictation (Whisper)',
+  'Customizable templates',
+  'WhatsApp auto-delivery',
+  'Visual atlas of 21 pathologies',
+  'Runs locally — your data stays with you',
 ];
 
 export default function Home() {
   return (
-    <div className="flex flex-col">
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        {/* Floating gold orb */}
+    <div className="min-h-screen bg-[#0A0E14] text-slate-200" dir="ltr">
+      <nav className="border-b border-slate-800/50 bg-slate-950/40 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded bg-gradient-to-br from-cyan-500 to-cyan-700 text-white">
+              <Sparkles className="h-3.5 w-3.5" />
+            </div>
+            <span className="text-sm font-black text-slate-200">midcine</span>
+          </div>
+          <div className="flex items-center gap-4 text-xs text-slate-400">
+            <Link href="/anatomy" className="hover:text-cyan-300">
+              Atlas
+            </Link>
+            <Link href="/settings" className="flex items-center gap-1 hover:text-cyan-300">
+              <Settings className="h-3 w-3" />
+              Settings
+            </Link>
+            <Link
+              href="/room"
+              className="rounded-full bg-cyan-500 px-3 py-1 font-bold text-slate-950 hover:bg-cyan-400"
+            >
+              Open Room
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      <section className="relative overflow-hidden border-b border-slate-800">
         <div
-          className="pointer-events-none absolute -right-24 -top-24 h-[500px] w-[500px] rounded-full opacity-40 blur-3xl"
-          style={{ background: 'radial-gradient(circle, rgba(197,160,89,0.25), transparent 70%)' }}
+          className="pointer-events-none absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full opacity-40 blur-3xl"
+          style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.15), transparent 70%)' }}
         />
         <div
-          className="pointer-events-none absolute -bottom-24 -left-24 h-[400px] w-[400px] rounded-full opacity-30 blur-3xl"
-          style={{ background: 'radial-gradient(circle, rgba(21,48,91,0.25), transparent 70%)' }}
+          className="pointer-events-none absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full opacity-30 blur-3xl"
+          style={{ background: 'radial-gradient(circle, rgba(251,191,36,0.1), transparent 70%)' }}
         />
 
-        <div className="relative mx-auto max-w-6xl px-6 py-16 lg:py-24">
-          <div className="border-gold-200 bg-gold-100/60 text-gold-500 mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold">
-            <Sparkles className="animate-badge-pulse h-3.5 w-3.5" />
-            <span>الجيل التالي · RIS/PACS عربي</span>
+        <div className="relative mx-auto max-w-5xl px-6 py-24">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-300">
+            <Sparkles className="h-3 w-3" />
+            For the radiologist who wants to leave work at 5pm
           </div>
 
-          <h1 className="text-brand-800 text-4xl font-black leading-tight md:text-6xl">
-            <span>منصّة الإشعاع </span>
-            <span className="text-gradient-gold">الفاخرة</span>
+          <h1 className="text-5xl font-black leading-tight text-slate-100 md:text-6xl">
+            Radiology reports
             <br />
-            <span>للطبيب العربي</span>
+            <span className="bg-gradient-to-r from-cyan-400 to-amber-400 bg-clip-text text-transparent">
+              in 15 seconds
+            </span>
           </h1>
 
-          <p className="text-muted-foreground mt-6 max-w-2xl text-base leading-loose md:text-lg">
-            تطبيق واحد بـ 7 مسارات، عقل ensemble من 46 وكيل NEXUS-AI، وأمن edge-first لا يغادر
-            مشفاك. صُمّمت midcine لتتفوّق بالاختلاف، لا بالتقليد.
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-400">
+            midcine reads the study, drafts the report, sends it. You edit, sign, move on. The hours
+            you save? Yours.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/worklist" className="btn-luxury">
-              <span>ابدأ قائمة العمل</span>
-              <ArrowLeft className="h-4 w-4" />
+          <div className="mt-10 flex flex-wrap gap-3">
+            <Link
+              href="/room"
+              className="group inline-flex items-center gap-2 rounded-full bg-cyan-500 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
+            >
+              Open reading room
+              <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </Link>
             <Link
               href="/anatomy"
-              className="border-border text-brand-800 hover:border-brand-800 hover:bg-brand-800 inline-flex items-center gap-2 rounded-xl border-2 bg-transparent px-6 py-3 font-bold transition hover:-translate-y-0.5 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-700 px-6 py-3 text-sm font-medium text-slate-300 hover:border-cyan-500 hover:text-cyan-300"
             >
-              <Heart className="h-4 w-4" />
-              <span>مختبر التشريح</span>
+              Pathology atlas
             </Link>
           </div>
-        </div>
 
-        {/* Stats bar under hero */}
-        <div className="border-border/60 relative border-y bg-white/60 py-6 backdrop-blur-md">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-8 px-6 lg:gap-16">
-            {stats.map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="text-brand-800 text-2xl font-black md:text-3xl">
-                  {s.value}
-                  {s.suffix && <span className="text-gold-400 ml-1 text-lg">{s.suffix}</span>}
-                </div>
-                <div className="ltr-only text-muted-foreground mt-0.5 text-[11px] font-medium uppercase tracking-widest">
-                  {s.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Trust dark bar */}
-      <section className="stats-bar-dark grid grid-cols-2 gap-6 px-6 py-10 md:grid-cols-4">
-        {trustPoints.map((t) => {
-          const Icon = t.icon;
-          return (
-            <div
-              key={t.title}
-              className="flex items-center gap-4 rounded-xl p-2 transition hover:bg-white/5"
-            >
-              <div className="border-gold-400/20 bg-gold-400/10 text-gold-400 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border">
-                <Icon className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-white">{t.title}</h3>
-                <p className="text-brand-400 mt-0.5 text-xs">{t.desc}</p>
-              </div>
+          <div className="mt-16 flex flex-wrap items-center gap-6 text-xs text-slate-500">
+            <div className="flex items-center gap-1.5">
+              <Shield className="h-3 w-3 text-emerald-400" />
+              Local-first — your data never leaves your machine
             </div>
-          );
-        })}
-      </section>
-
-      {/* Routes as luxury cards */}
-      <section className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
-        <div className="mb-10 text-center">
-          <div className="section-label mb-4 justify-center">
-            <span>modules</span>
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-3 w-3 text-amber-400" />
+              Save 5–7 hours per week
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Zap className="h-3 w-3 text-cyan-400" />
+              Works alongside your existing PACS
+            </div>
           </div>
-          <h2 className="text-brand-800 text-3xl font-black md:text-4xl">
-            كل ما يحتاجه قسم الإشعاع
-          </h2>
-          <p className="text-muted-foreground mx-auto mt-3 max-w-xl text-sm md:text-base">
-            8 مسارات مركّزة، تجربة موحّدة، ⌘K palette للتنقّل بين أي منها في ثوانٍ.
-          </p>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {routes.map((r) => {
-            const Icon = r.icon;
-            return (
-              <Link key={r.href} href={r.href} className="card-luxury group">
-                <div className="bg-gradient-navy text-gold-400 group-hover:bg-gradient-gold group-hover:text-brand-800 mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition">
-                  <Icon className="h-6 w-6" />
-                </div>
-                <h3 className="text-brand-800 mb-2 text-base font-bold">{r.title}</h3>
-                <p className="text-muted-foreground text-xs leading-relaxed">{r.desc}</p>
-                <div className="ltr-only text-gold-400 mt-3 font-mono text-[10px] opacity-70">
-                  {r.href}
-                </div>
-              </Link>
-            );
-          })}
         </div>
       </section>
 
-      {/* Conversion banner */}
-      <section className="mx-auto max-w-6xl px-6 pb-16">
-        <div className="from-brand-800 via-brand-700 to-brand-900 shadow-navy relative overflow-hidden rounded-3xl bg-gradient-to-br p-10 text-white md:p-16">
-          <div
-            className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full opacity-40 blur-3xl"
-            style={{ background: 'radial-gradient(circle, rgba(197,160,89,0.2), transparent 60%)' }}
-          />
-          <div className="via-gold-400 pointer-events-none absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-transparent to-transparent" />
+      <section className="border-b border-slate-800 py-24">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="mb-12 text-center">
+            <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-cyan-400">
+              Three moves. Every case.
+            </div>
+            <h2 className="text-3xl font-black text-slate-100 md:text-4xl">
+              Built for the read, not the meeting
+            </h2>
+          </div>
 
-          <div className="relative flex flex-wrap items-center justify-between gap-8">
-            <div className="max-w-lg">
-              <div className="section-label text-gold-400 mb-4">
-                <span>الفلسفة</span>
+          <div className="grid gap-6 md:grid-cols-3">
+            {features.map((f) => {
+              const Icon = f.icon;
+              return (
+                <div
+                  key={f.title}
+                  className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 p-6 transition hover:border-cyan-500/40"
+                >
+                  <div className="absolute right-4 top-4 text-[9px] font-bold uppercase tracking-widest text-slate-600">
+                    {f.tag}
+                  </div>
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-amber-500/20 text-cyan-300">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="mb-2 text-lg font-bold text-slate-100">{f.title}</h3>
+                  <p className="text-sm leading-relaxed text-slate-400">{f.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-slate-800 py-24">
+        <div className="mx-auto max-w-3xl px-6">
+          <div className="mb-8 text-center">
+            <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-cyan-400">
+              Pricing
+            </div>
+            <h2 className="text-3xl font-black text-slate-100 md:text-4xl">
+              One plan. Everything.
+            </h2>
+          </div>
+
+          <div className="relative overflow-hidden rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-slate-900 to-slate-950 p-8">
+            <div
+              className="pointer-events-none absolute inset-0 opacity-30"
+              style={{
+                background:
+                  'radial-gradient(circle at top right, rgba(34,211,238,0.15), transparent 60%)',
+              }}
+            />
+            <div className="relative">
+              <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-cyan-300">
+                midcine Pro
               </div>
-              <h2 className="text-2xl font-black leading-relaxed md:text-3xl">
-                نتفوّق بالاختلاف،
-                <br />
-                لا بالتقليد.
-              </h2>
-              <p className="text-brand-300 mt-4 text-sm leading-loose md:text-base">
-                6 مبادئ تحكم كل قرار: NEXUS = العقل، أمن لا يقيّد الإبداع، لا تقليد، ensemble في كل
-                طبقة، استغلال ما تتجنّبه الأنظمة الكبيرة، وويب أولاً.
+              <div className="mb-1 flex items-baseline gap-2">
+                <span className="text-6xl font-black text-slate-100">$79</span>
+                <span className="text-slate-500">/month</span>
+              </div>
+              <div className="mb-6 text-xs text-slate-500">
+                14-day free trial · no card required
+              </div>
+
+              <ul className="mb-8 space-y-2">
+                {includes.map((line) => (
+                  <li key={line} className="flex items-center gap-2 text-sm text-slate-300">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-400">
+                      <Check className="h-3 w-3" />
+                    </div>
+                    {line}
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/room"
+                className="block rounded-full bg-cyan-500 py-3 text-center text-sm font-bold text-slate-950 hover:bg-cyan-400"
+              >
+                Start free trial
+              </Link>
+
+              <p className="mt-4 text-center text-[10px] text-slate-500">
+                You control every word. Reports are drafts. You sign them.
               </p>
             </div>
-
-            <div className="flex flex-wrap gap-4">
-              {[
-                { n: '90', l: 'يوم للـ MVP' },
-                { n: '$150', l: 'شهرياً لعشرة مراكز' },
-                { n: '7', l: 'مسار موحّد' },
-              ].map((m) => (
-                <div
-                  key={m.l}
-                  className="hover:border-gold-400/30 hover:bg-gold-400/10 min-w-[140px] rounded-2xl border border-white/10 bg-white/5 px-8 py-6 text-center transition"
-                >
-                  <div className="text-gradient-gold text-3xl font-black md:text-4xl">{m.n}</div>
-                  <div className="text-brand-400 mt-2 text-xs">{m.l}</div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
+
+      <footer className="mx-auto max-w-5xl px-6 py-8 text-center text-[10px] text-slate-600">
+        © {new Date().getFullYear()} midcine · Local-first · Physician-signed · Not a diagnostic
+        device
+      </footer>
     </div>
   );
 }
