@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>midcine — live demo cases</title>
+<meta name="description" content="Live demo of midcine radiology AI. 17 fictional cases you can open in the viewer.">
+<style>
+  :root {
+    --bg: #0A0E14;
+    --card: #131A25;
+    --border: #1F2937;
+    --text: #E5E7EB;
+    --muted: #94A3B8;
+    --accent: #06B6D4;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .demo-banner {
+    position: sticky; top: 0; z-index: 100;
+    background: #F59E0B; color: #0A0E14;
+    padding: 8px 16px; text-align: center;
+    font-weight: 700; font-size: 12px; letter-spacing: 0.03em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .demo-banner a { color: #0A0E14; text-decoration: underline; }
+
+  header.page {
+    padding: 32px 24px 16px; max-width: 1200px; margin: 0 auto;
+  }
+  h1 { margin: 0 0 8px; font-size: 32px; letter-spacing: -0.02em; }
+  .tagline { margin: 0 0 24px; color: var(--muted); font-size: 15px; max-width: 700px; }
+  .stats {
+    display: flex; gap: 24px; margin: 16px 0 32px; padding: 16px 20px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-num { font-size: 22px; font-weight: 700; color: var(--accent); }
+  .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  main { padding: 0 24px 48px; max-width: 1200px; margin: 0 auto; }
+  .grid {
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px; display: flex; flex-direction: column; gap: 10px;
+    transition: transform 120ms ease, border-color 120ms ease;
+  }
+  .card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .card-head { display: flex; align-items: center; gap: 8px; }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    color: white; font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+  }
+  .date { margin-left: auto; color: var(--muted); font-size: 11px; }
+  .body-part { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+  .desc { margin: 0; color: var(--muted); font-size: 13px; min-height: 18px; }
+  .patient {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 10px; background: rgba(6, 182, 212, 0.06); border-radius: 8px;
+    font-size: 13px;
+  }
+  .patient strong { color: var(--text); }
+  .pid { color: var(--muted); font-size: 11px; font-family: 'SF Mono', monospace; }
+  .actions { display: flex; gap: 8px; margin-top: auto; }
+  .btn {
+    flex: 1; text-align: center; padding: 9px 12px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; text-decoration: none;
+    transition: background 120ms ease;
+  }
+  .btn.primary { background: var(--accent); color: #0A0E14; }
+  .btn.primary:hover { background: #0891B2; text-decoration: none; }
+  .btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn.ghost:hover { background: var(--border); color: var(--text); text-decoration: none; }
+
+  footer {
+    padding: 24px; max-width: 1200px; margin: 0 auto;
+    color: var(--muted); font-size: 12px; text-align: center;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+  <div class="demo-banner">
+    ⚠ DEMO / FICTIONAL DATA — All patients, IDs, and clinical text are synthetic.
+    DICOM pixels are anonymized fixtures. No real PHI.
+    &nbsp; · &nbsp; <a href="https://github.com/61465/midcine">Source on GitHub</a>
+  </div>
+
+  <header class="page">
+    <h1>midcine — live demo</h1>
+    <p class="tagline">
+      Zero-code radiology AI. DICOM in, structured reports out.
+      Pick a case below to open it in the live viewer running on the host.
+    </p>
+    <div class="stats">
+      <div class="stat"><span class="stat-num">17</span><span class="stat-lbl">Demo cases</span></div>
+      <div class="stat"><span class="stat-num">MR · CT · X-ray</span><span class="stat-lbl">Modalities</span></div>
+      <div class="stat"><span class="stat-num">NiiVue + Cornerstone</span><span class="stat-lbl">Viewers</span></div>
+      <div class="stat"><span class="stat-num">Live</span><span class="stat-lbl">Backend on Tailscale</span></div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#0891B2">CT</span>
+        <span class="badge priority" style="background:#CA8A04">P3</span>
+        <span class="date">2026-07-06</span>
+      </header>
+      <h3 class="body-part">CHEST</h3>
+      <p class="desc">Demo CT study</p>
+      <div class="patient">
+        <strong>Morgan Lane (DEMO)</strong>
+        <span class="pid">DEMO-447268</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.826.0.1.3680043.10.midcine.1783361468452.7912447268" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.826.0.1.3680043.10.midcine.1783361468452.7912447268" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#0891B2">CT</span>
+        <span class="badge priority" style="background:#CA8A04">P3</span>
+        <span class="date">2026-07-06</span>
+      </header>
+      <h3 class="body-part">BRAIN</h3>
+      <p class="desc">Demo CT study</p>
+      <div class="patient">
+        <strong>Taylor Hart (DEMO)</strong>
+        <span class="pid">DEMO-017454</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.826.0.1.3680043.10.midcine.1783361845460.728017454" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.826.0.1.3680043.10.midcine.1783361845460.728017454" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#7C3AED">MR</span>
+        <span class="badge priority" style="background:#CA8A04">P3</span>
+        <span class="date">2026-07-06</span>
+      </header>
+      <h3 class="body-part">SPINE</h3>
+      <p class="desc">Demo MR study</p>
+      <div class="patient">
+        <strong>Dakota Poe (DEMO)</strong>
+        <span class="pid">DEMO-885460</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.826.0.1.3680043.10.midcine.1783361967562.5518885460" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.826.0.1.3680043.10.midcine.1783361967562.5518885460" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#0891B2">CT</span>
+        <span class="badge priority" style="background:#CA8A04">P3</span>
+        <span class="date">2026-07-06</span>
+      </header>
+      <h3 class="body-part">CHEST</h3>
+      <p class="desc">Demo CT study</p>
+      <div class="patient">
+        <strong>Morgan Lane (DEMO)</strong>
+        <span class="pid">DEMO-298082</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.826.0.1.3680043.10.midcine.joun.1783298082" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.826.0.1.3680043.10.midcine.joun.1783298082" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#0891B2">CT</span>
+        <span class="badge priority" style="background:#DC2626">P1</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">BRAIN</h3>
+      <p class="desc">Demo CT study</p>
+      <div class="patient">
+        <strong>Rowan Vega (DEMO)</strong>
+        <span class="pid">DEMO-177812</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.826.0.1.midcine.ACC-77812" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.826.0.1.midcine.ACC-77812" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#7C3AED">MR</span>
+        <span class="badge priority" style="background:#CA8A04">P3</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">SPINE</h3>
+      <p class="desc">Demo MR study</p>
+      <div class="patient">
+        <strong>Alex Kim (DEMO)</strong>
+        <span class="pid">DEMO-188921</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.826.0.1.midcine.ACC-88921" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.826.0.1.midcine.ACC-88921" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#0891B2">CT</span>
+        <span class="badge priority" style="background:#CA8A04">P3</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">BRAIN</h3>
+      <p class="desc">Demo CT study</p>
+      <div class="patient">
+        <strong>Casey Cross (DEMO)</strong>
+        <span class="pid">DEMO-601001</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.826.0.1.midcine.ORU-TEST-001" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.826.0.1.midcine.ORU-TEST-001" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#0891B2">CT</span>
+        <span class="badge priority" style="background:#DC2626">P1</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">CHEST</h3>
+      <p class="desc">Demo CT study</p>
+      <div class="patient">
+        <strong>Casey Cross (DEMO)</strong>
+        <span class="pid">DEMO-230001</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.3.SAMPLE.0001" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.3.SAMPLE.0001" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#7C3AED">MR</span>
+        <span class="badge priority" style="background:#DC2626">P1</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">BRAIN</h3>
+      <p class="desc">Demo MR study</p>
+      <div class="patient">
+        <strong>Morgan Lane (DEMO)</strong>
+        <span class="pid">DEMO-230002</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.3.SAMPLE.0002" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.3.SAMPLE.0002" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#0891B2">CT</span>
+        <span class="badge priority" style="background:#DC2626">P1</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">CHEST</h3>
+      <p class="desc">Demo CT study</p>
+      <div class="patient">
+        <strong>Riley Reed (DEMO)</strong>
+        <span class="pid">DEMO-230003</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.3.SAMPLE.0003" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.3.SAMPLE.0003" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#7C3AED">MR</span>
+        <span class="badge priority" style="background:#EA580C">P2</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">BRAIN</h3>
+      <p class="desc">Demo MR study</p>
+      <div class="patient">
+        <strong>Avery Brooks (DEMO)</strong>
+        <span class="pid">DEMO-230004</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.3.SAMPLE.0004" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.3.SAMPLE.0004" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#0891B2">CT</span>
+        <span class="badge priority" style="background:#EA580C">P2</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">CHEST</h3>
+      <p class="desc">Demo CT study</p>
+      <div class="patient">
+        <strong>Quinn Cole (DEMO)</strong>
+        <span class="pid">DEMO-230005</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.3.SAMPLE.0005" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.3.SAMPLE.0005" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#DC2626">US</span>
+        <span class="badge priority" style="background:#EA580C">P2</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">ABDOMEN</h3>
+      <p class="desc">Demo ultrasound</p>
+      <div class="patient">
+        <strong>Reese Doe (DEMO)</strong>
+        <span class="pid">DEMO-230006</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.3.SAMPLE.0006" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.3.SAMPLE.0006" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#0891B2">CT</span>
+        <span class="badge priority" style="background:#DC2626">P1</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">BRAIN</h3>
+      <p class="desc">Demo CT study</p>
+      <div class="patient">
+        <strong>Skyler Roe (DEMO)</strong>
+        <span class="pid">DEMO-230007</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.3.SAMPLE.0007" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.3.SAMPLE.0007" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#64748B">DR</span>
+        <span class="badge priority" style="background:#CA8A04">P3</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">SPINE</h3>
+      <p class="desc">Demo study</p>
+      <div class="patient">
+        <strong>Dakota Poe (DEMO)</strong>
+        <span class="pid">DEMO-230008</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.3.SAMPLE.0008" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.3.SAMPLE.0008" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#059669">CR</span>
+        <span class="badge priority" style="background:#CA8A04">P3</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">CHEST</h3>
+      <p class="desc">Demo X-ray</p>
+      <div class="patient">
+        <strong>Rowan Vega (DEMO)</strong>
+        <span class="pid">DEMO-230009</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.3.SAMPLE.0009" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.3.SAMPLE.0009" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+
+    <article class="card">
+      <header class="card-head">
+        <span class="badge modality" style="background:#64748B">DR</span>
+        <span class="badge priority" style="background:#0891B2">P5</span>
+        <span class="date">2026-07-02</span>
+      </header>
+      <h3 class="body-part">CHEST</h3>
+      <p class="desc">Demo study</p>
+      <div class="patient">
+        <strong>Casey Cross (DEMO)</strong>
+        <span class="pid">DEMO-230010</span>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://ame.tail19ddab.ts.net:8445/viewer/1.2.3.SAMPLE.0010" target="_blank" rel="noopener">
+          🩻 Open in viewer
+        </a>
+        <a class="btn ghost" href="https://ame.tail19ddab.ts.net:8445/room?study=1.2.3.SAMPLE.0010" target="_blank" rel="noopener">
+          Reading room
+        </a>
+      </div>
+    </article>
+    
+    </div>
+  </main>
+
+  <footer>
+    Demo hosted on the developer's machine over Tailscale Funnel.
+    Availability follows host uptime.
+    &nbsp; · &nbsp;
+    <a href="https://github.com/61465/midcine">github.com/61465/midcine</a>
+  </footer>
+</body>
+</html>
