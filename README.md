@@ -1,6 +1,26 @@
 # midcine
 > Zero-code radiology AI assistant that runs inside your hospital firewall — DICOM in, structured reports out.
 
+---
+
+## 🩻 Live demo (open in browser — no install)
+
+**► [https://ame.tail19ddab.ts.net:8445/reports](https://ame.tail19ddab.ts.net:8445/reports)**  ← click any case in the worklist
+
+**► [Open a sample study directly (MR spine)](https://ame.tail19ddab.ts.net:8445/viewer/1.2.826.0.1.3680043.10.midcine.1783361967562.5518885460)**
+
+The demo runs on a private machine over Tailscale Funnel — availability follows the host's uptime.
+All patient names, IDs, and free-text clinical fields are **synthetic**; DICOM pixel data is anonymized.
+A yellow `⚠ DEMO / FICTIONAL DATA` banner is visible on every page.
+
+**What to try on the demo:**
+- Open `/reports` → pick a case → 2D viewer with window/level, zoom, pan, length + angle tools
+- Open `/viewer/<uid>` → NiiVue MPR / 3D volume rendering
+- Voice dictate + AI report drafting are wired (may take 15–90 s per request; hosted LLM)
+- Upload your own anonymized DICOM at `/upload` (files stay on host, never re-shared)
+
+---
+
 ## Who reads this?
 Hospital IT administrators who need to deploy midcine in under 5 minutes on existing Docker infrastructure.
 
