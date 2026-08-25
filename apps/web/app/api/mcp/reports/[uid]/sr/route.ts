@@ -1,8 +1,8 @@
-const BRIDGE_URL = process.env.MCP_BRIDGE_URL ?? 'http://localhost:8210';
+import { bridgeFetch } from '../../../../../../lib/bridge-fetch';
 
 export async function GET(_req: Request, { params }: { params: Promise<{ uid: string }> }) {
   const { uid } = await params;
-  const r = await fetch(`${BRIDGE_URL}/reports/${encodeURIComponent(uid)}/sr`, {
+  const r = await bridgeFetch(`/reports/${encodeURIComponent(uid)}/sr`, {
     signal: AbortSignal.timeout(30_000),
   });
   if (!r.ok) {

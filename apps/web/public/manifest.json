@@ -1,0 +1,24 @@
+{
+  "name": "midcine — radiology reader",
+  "short_name": "midcine",
+  "description": "AI-powered radiology reading room + reporting",
+  "start_url": "/room",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0A0E14",
+  "theme_color": "#0891b2",
+  "categories": ["medical", "productivity", "healthcare"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Reading room", "url": "/room" },
+    { "name": "Referring portal", "url": "/referrer" },
+    { "name": "Analytics", "url": "/analytics" }
+  ]
+}

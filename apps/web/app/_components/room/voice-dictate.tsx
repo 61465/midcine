@@ -145,7 +145,7 @@ export function VoiceDictate({ onText }: { onText: (text: string) => void }) {
                 ? 'border-rose-500 bg-rose-500/10 text-rose-400'
                 : 'border-slate-700 bg-slate-800 text-slate-400 hover:border-cyan-500 hover:text-cyan-300')
         }
-        title="اضغط أو استمر بضغط Space للإملاء"
+        title="Hold to dictate: text is transcribed and inserted into the focused text field (click a Findings/Impression box first, then hold the mic or SPACE key). Uses local faster-whisper via bridge — no cloud upload."
       >
         {state === 'transcribing' ? (
           <Loader2 className="h-6 w-6 animate-spin" />
@@ -156,13 +156,19 @@ export function VoiceDictate({ onText }: { onText: (text: string) => void }) {
         )}
       </button>
 
+      {/* Idle hint — visible until user first uses the mic */}
+      {state === 'idle' && (
+        <div className="pointer-events-none fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full border border-slate-700 bg-slate-950/90 px-3 py-1 text-[10px] text-slate-400 backdrop-blur">
+          Click Findings/Impression → hold mic (or SPACE) to dictate
+        </div>
+      )}
       {/* Recording overlay */}
       {state === 'recording' && (
         <div className="fixed bottom-24 left-1/2 z-40 -translate-x-1/2 rounded-full border border-rose-500/40 bg-rose-500/10 px-4 py-1.5 text-xs text-rose-200 backdrop-blur">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 animate-pulse rounded-full bg-rose-400" />
-            جارٍ التسجيل…
-            <div className="ltr-only h-1 w-24 overflow-hidden rounded-full bg-rose-950">
+            Recording — release to transcribe
+            <div className="h-1 w-24 overflow-hidden rounded-full bg-rose-950">
               <div
                 className="h-full bg-rose-400 transition-[width]"
                 style={{ width: `${Math.round(level * 100)}%` }}

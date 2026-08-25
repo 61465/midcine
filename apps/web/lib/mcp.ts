@@ -61,7 +61,7 @@ export interface PipelineResponse {
 export async function runPipeline(study: StudyMetadata): Promise<PipelineResponse> {
   const r = await fetch('/api/mcp/pipeline', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
     body: JSON.stringify({ study }),
   });
   if (!r.ok) {
@@ -86,7 +86,7 @@ export function streamPipeline(study: StudyMetadata, cbs: StreamCallbacks): () =
     try {
       const r = await fetch('/api/mcp/pipeline/stream', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
         body: JSON.stringify({ study }),
         signal: controller.signal,
       });

@@ -1,0 +1,25 @@
+import { NextResponse } from 'next/server';
+import { bridgeFetch } from '../../../../../../lib/bridge-fetch';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 120;
+
+export async function POST(req: Request) {
+  const contentType = req.headers.get('content-type') ?? '';
+  const body = await req.arrayBuffer();
+  try {
+    const r = await bridgeFetch('/ai/report-sessions/init', {
+      method: 'POST',
+      headers: contentType ? { 'Content-Type': contentType } : {},
+      body,
+      signal: AbortSignal.timeout(120_000),
+    });
+    return NextResponse.json(await r.json(), { status: r.status });
+  } catch (e) {
+    return NextResponse.json(
+      { ok: false, error: `Bridge unreachable: ${(e as Error).message}` },
+      { status: 502 },
+    );
+  }
+}

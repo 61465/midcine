@@ -112,3 +112,19 @@ services/mcp-bridge/.venv/
 
 # Naraya architect output
 naraya-out/
+
+# Additional session output dirs — never commit
+audit-out/
+image/
+intake-out/
+polish-out/
+tablet-out/
+handoff/
+research/
+
+# Real patient DICOM stashes (Arabic + typo variants)
+حالات/
+Common Tamplates/
+Common Tamplates.zip
+"Common Tamplates"/
+

@@ -6,12 +6,61 @@ for the radiologist to edit and sign.
 
 from __future__ import annotations
 
+import re
+import unicodedata
 from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
 from .schemas import AgentOutput, AggregateResponse, StudyMetadata
+
+
+# ---- Arabic → Latin transliteration (deterministic, offline) ----------------
+
+_ARABIC_RE = re.compile(r"[؀-ۿݐ-ݿࢠ-ࣿ]")
+
+# Basic character map — covers Arabic letters + diacritics.
+_TRANSLIT_MAP = {
+    "ا": "a", "أ": "a", "إ": "i", "آ": "aa", "ء": "", "ى": "a", "ئ": "y",
+    "ؤ": "w", "ب": "b", "ت": "t", "ة": "a", "ث": "th", "ج": "j", "ح": "h",
+    "خ": "kh", "د": "d", "ذ": "dh", "ر": "r", "ز": "z", "س": "s", "ش": "sh",
+    "ص": "s", "ض": "d", "ط": "t", "ظ": "z", "ع": "a", "غ": "gh", "ف": "f",
+    "ق": "q", "ك": "k", "ل": "l", "م": "m", "ن": "n", "ه": "h", "و": "w",
+    "ي": "y", "ﻻ": "la", "ﻷ": "la", "ﻹ": "li",
+    # diacritics — drop them
+    "َ": "", "ً": "", "ُ": "", "ٌ": "", "ِ": "", "ٍ": "", "ْ": "", "ّ": "",
+    "ـ": "", "،": ",", "؛": ";", "؟": "?", "«": "\"", "»": "\"",
+    # digits
+    "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4",
+    "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9",
+}
+
+
+def transliterate_arabic(text: str) -> str:
+    """Convert Arabic to Latin. Non-Arabic characters are passed through.
+    Deterministic (no LLM), fast, safe for names + short fields."""
+    if not text or not _ARABIC_RE.search(text):
+        return text
+    out: list[str] = []
+    for ch in text:
+        if ch in _TRANSLIT_MAP:
+            out.append(_TRANSLIT_MAP[ch])
+        else:
+            out.append(ch)
+    result = "".join(out)
+    # Capitalize word-initial letters (better for names)
+    result = " ".join(w[:1].upper() + w[1:] if w else w for w in result.split(" "))
+    # Strip stray apostrophes at word boundaries
+    result = re.sub(r"^'|'$", "", result)
+    result = re.sub(r"\s+", " ", result).strip()
+    return result
+
+
+def strip_arabic(text: str) -> str:
+    """Transliterate Arabic content in text. Used as a final safety net for
+    any AI output that leaks Arabic despite English enforcement."""
+    return transliterate_arabic(text)
 
 
 class ReportSection(BaseModel):
@@ -38,35 +87,46 @@ class FinalReport(BaseModel):
     generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-_MODALITY_AR = {
-    "CT": "تصوير مقطعي محوسب",
-    "MR": "تصوير بالرنين المغناطيسي",
-    "CR": "أشعة سينية رقمية",
-    "DR": "أشعة سينية رقمية مباشرة",
-    "US": "تصوير بالموجات فوق الصوتية",
-    "MG": "تصوير الثدي الشعاعي",
-    "NM": "تصوير طبّ نووي",
-    "PT": "تصوير مقطعي بالإصدار البوزيتروني",
+_MODALITY_EN = {
+    "CT": "Computed tomography",
+    "MR": "Magnetic resonance imaging",
+    "MRI": "Magnetic resonance imaging",
+    "CR": "Digital radiography",
+    "DR": "Digital radiography",
+    "US": "Ultrasound",
+    "MG": "Mammography",
+    "NM": "Nuclear medicine imaging",
+    "PT": "Positron emission tomography",
+    "PET": "Positron emission tomography",
 }
 
-_BODY_PART_AR = {
-    "BRAIN": "الدماغ",
-    "HEAD": "الرأس",
-    "CHEST": "الصدر",
-    "THORAX": "الصدر",
-    "ABDOMEN": "البطن",
-    "PELVIS": "الحوض",
-    "SPINE": "العمود الفقري",
-    "MSK": "الجهاز العضلي الهيكلي",
-    "KIDNEY": "الكليتين",
-    "LIVER": "الكبد",
+_BODY_PART_EN = {
+    "BRAIN": "the brain",
+    "HEAD": "the head",
+    "CHEST": "the chest",
+    "THORAX": "the chest",
+    "ABDOMEN": "the abdomen",
+    "PELVIS": "the pelvis",
+    "SPINE": "the spine",
+    "LUMBAR": "the lumbar spine",
+    "CERVICAL": "the cervical spine",
+    "MSK": "the musculoskeletal system",
+    "KIDNEY": "the kidneys",
+    "LIVER": "the liver",
+    "HEART": "the heart",
+    "KNEE": "the knee",
+    "HIP": "the hip",
+    "SHOULDER": "the shoulder",
+    "NECK": "the neck",
+    "BREAST": "the breast",
 }
 
 
 def _technique_ar(modality: str, body_part: str) -> str:
-    m = _MODALITY_AR.get(modality.upper(), modality)
-    b = _BODY_PART_AR.get(body_part.upper(), body_part)
-    return f"{m} لـ{b} بدون تباين."
+    """Kept the '_ar' name for wire compat, but returns English."""
+    m = _MODALITY_EN.get(modality.upper(), modality)
+    b = _BODY_PART_EN.get(body_part.upper(), body_part.lower() if body_part else "the region")
+    return f"{m} of {b} without contrast."
 
 
 def _extract_from_agent(outputs: list[AgentOutput], agent: str, key: str) -> object | None:
@@ -92,7 +152,7 @@ def _pick_impression(aggregate: AggregateResponse, outputs: list[AgentOutput]) -
     if aggregate.findings:
         return aggregate.findings[0].text
 
-    return "لا انطباع محدّد — يستدعي مراجعة الطبيب."
+    return "No specific impression — radiologist review required."
 
 
 def _pick_recommendations(outputs: list[AgentOutput]) -> list[str]:
@@ -110,15 +170,15 @@ def _findings_block(aggregate: AggregateResponse, outputs: list[AgentOutput]) ->
     if isinstance(vis, list) and vis:
         return "\n".join(f"• {x!s}" for x in vis)
 
-    return "لم يُكتشف أي شذوذ يستدعي الإبلاغ."
+    return "No abnormality requiring reporting was detected."
 
 
 def _patient_block(study: StudyMetadata) -> str:
-    name = study.patient_name or "—"
-    pid = study.patient_id or "—"
-    parts = [f"الاسم: {name}", f"رقم المريض: {pid}"]
+    name = transliterate_arabic(study.patient_name or "—")
+    pid = transliterate_arabic(study.patient_id or "—")
+    parts = [f"Name: {name}", f"Patient ID: {pid}"]
     if study.clinical_context:
-        parts.append(f"السياق الإكلينيكي: {study.clinical_context}")
+        parts.append(f"Clinical context: {transliterate_arabic(study.clinical_context)}")
     return "\n".join(parts)
 
 
@@ -129,42 +189,42 @@ def generate_from_aggregate(
 ) -> FinalReport:
     """Build the initial draft report from AI outputs.
     Radiologist can then edit each section before signing."""
-    impression = _pick_impression(aggregate, outputs)
-    recommendations = _pick_recommendations(outputs)
-    findings_text = _findings_block(aggregate, outputs)
+    impression = strip_arabic(_pick_impression(aggregate, outputs))
+    recommendations = [strip_arabic(r) for r in _pick_recommendations(outputs)]
+    findings_text = strip_arabic(_findings_block(aggregate, outputs))
 
     sections = [
         ReportSection(
             key="patient",
-            title_ar="بيانات المريض",
+            title_ar="Patient",
             content_ar=_patient_block(study),
             editable=False,
         ),
         ReportSection(
             key="technique",
-            title_ar="تقنية الفحص",
+            title_ar="Technique",
             content_ar=_technique_ar(study.modality, study.body_part),
             editable=True,
         ),
         ReportSection(
             key="findings",
-            title_ar="الموجودات",
+            title_ar="Findings",
             content_ar=findings_text,
             editable=True,
         ),
         ReportSection(
             key="impression",
-            title_ar="الانطباع",
+            title_ar="Impression",
             content_ar=impression,
             editable=True,
         ),
         ReportSection(
             key="recommendations",
-            title_ar="التوصيات",
+            title_ar="Recommendations",
             content_ar=(
                 "\n".join(f"• {r}" for r in recommendations)
                 if recommendations
-                else "لا توصيات محدّدة."
+                else "No specific recommendations."
             ),
             editable=True,
         ),
@@ -172,8 +232,8 @@ def generate_from_aggregate(
 
     return FinalReport(
         study_uid=study.study_uid,
-        patient_id=study.patient_id,
-        patient_name=study.patient_name,
+        patient_id=transliterate_arabic(study.patient_id or ""),
+        patient_name=transliterate_arabic(study.patient_name or ""),
         hospital_id=study.hospital_id or "default",
         modality=study.modality,
         body_part=study.body_part,

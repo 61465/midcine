@@ -16,6 +16,48 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Tablet/touch: enlarge tap targets in toolbars (WCAG 2.5.5 + Apple HIG 44pt) */
+@media (max-width: 1279px) and (pointer: coarse) {
+  button,
+  a[role='button'],
+  [role='button'] {
+    min-height: 44px;
+  }
+  /* Give viewer toolbar buttons breathing room */
+  .flex.flex-wrap.items-center.gap-1 > button {
+    padding: 8px 12px;
+  }
+  /* Slider thumbs bigger */
+  input[type='range']::-webkit-slider-thumb {
+    height: 24px;
+    width: 24px;
+  }
+  /* Disable text selection on toolbar rows (prevents accidental highlight) */
+  header,
+  nav,
+  .flex.items-center.gap-1 {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Prevent iOS Safari from zooming when tapping form inputs */
+@media screen and (max-width: 1024px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Safe-area support for PWA on iPad */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* RTL-specific tweaks */
 [dir='rtl'] .ltr-only {
   direction: ltr;

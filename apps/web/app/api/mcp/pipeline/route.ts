@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-
-const BRIDGE_URL = process.env.MCP_BRIDGE_URL ?? 'http://localhost:8210';
+import { bridgeFetch } from '../../../../lib/bridge-fetch';
 
 interface Body {
   study: {
@@ -16,7 +15,7 @@ interface Body {
 export async function POST(req: Request) {
   const body = (await req.json()) as Body;
   try {
-    const r = await fetch(`${BRIDGE_URL}/pipeline`, {
+    const r = await bridgeFetch(`/pipeline`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -41,7 +40,7 @@ export async function POST(req: Request) {
 
 export async function GET() {
   try {
-    const r = await fetch(`${BRIDGE_URL}/health`, { signal: AbortSignal.timeout(5000) });
+    const r = await bridgeFetch(`/health`, { signal: AbortSignal.timeout(5000) });
     return NextResponse.json(await r.json(), { status: r.ok ? 200 : 502 });
   } catch (e: any) {
     return NextResponse.json({ error: 'bridge_unreachable' }, { status: 502 });

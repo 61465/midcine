@@ -21,33 +21,51 @@ from .schemas import AgentOutput
 log = logging.getLogger("mcp-bridge.agents")
 
 NARAYA_BASE = os.getenv("NARAYA_BASE", "https://router.bynara.id/v1")
-NARAYA_MODEL = os.getenv("NARAYA_MODEL", "mistral-large")
+# Bynara catalogue 2026-07-06 with current free tier:
+#   FREE: mistral-large, mistral-medium-3-5, kimi-k2.7-code-free
+#   PAID (requires upgrade): claude-opus-4.7/4.8, claude-sonnet-5, gpt-5.4/5.5, glm-*,
+#         deepseek-v4-*, mimo-v2.5-*, qwen3.7-max, minimax-m3
+# We use mistral-medium-3-5 (newer, better quality) with mistral-large as fallback.
+# Set NARAYA_MODEL_* env vars to override per-task once the plan is upgraded.
+NARAYA_MODEL = os.getenv("NARAYA_MODEL", "mistral-medium-3-5")
+NARAYA_MODEL_IMPRESSION = os.getenv("NARAYA_MODEL_IMPRESSION", "mistral-medium-3-5")
+NARAYA_MODEL_CRITICAL = os.getenv("NARAYA_MODEL_CRITICAL", "mistral-medium-3-5")
+NARAYA_MODEL_COMPARE = os.getenv("NARAYA_MODEL_COMPARE", "mistral-medium-3-5")
 
-# Per-agent role prompts. Kept short so latency stays low.
+# Per-agent role prompts. English only. Kept short so latency stays low.
+_LANG_LOCK = (
+    "LANGUAGE LOCK: Respond in clinical English ONLY. Never write Arabic or any "
+    "other language. If input contains Arabic, understand it internally and "
+    "reply in native clinical English. "
+)
 AGENT_ROLES: dict[str, str] = {
     "vision_ai": (
-        "You are a radiology vision specialist. Given study metadata (modality, body part) "
+        _LANG_LOCK
+        + "You are a radiology vision specialist. Given study metadata (modality, body part) "
         "and clinical context, produce ONE JSON object with keys: "
-        "summary (string, Arabic, <=200 chars), findings (array of strings), "
-        "confidence (float 0-1). NO prose outside JSON."
+        "summary (clinical English, <=200 chars), findings (array of English strings), "
+        "confidence (float 0-1). NO prose outside JSON. NO Arabic characters."
     ),
     "clinical_llm": (
-        "You are a clinical LLM producing a structured Arabic radiology report draft. "
-        "Return ONE JSON object with keys: summary (Arabic), impression (Arabic), "
-        "recommendations (array of Arabic strings), confidence (float 0-1). "
-        "NO prose outside JSON."
+        _LANG_LOCK
+        + "You are a clinical LLM producing a structured English radiology report draft. "
+        "Return ONE JSON object with keys: summary (English), impression (English), "
+        "recommendations (array of English strings), confidence (float 0-1). "
+        "NO prose outside JSON. NO Arabic characters."
     ),
     "guardian": (
-        "You are a safety guardian. Check the study description for red flags "
+        _LANG_LOCK
+        + "You are a safety guardian. Check the study description for red flags "
         "(emergency findings, contrast allergy hints, pediatric considerations). "
-        "Return ONE JSON: {summary: Arabic, red_flags: array of Arabic strings, confidence: float}. "
-        "NO prose outside JSON."
+        "Return ONE JSON: {summary: English, red_flags: array of English strings, confidence: float}. "
+        "NO prose outside JSON. NO Arabic characters."
     ),
     "algorithm_expert": (
-        "You are an algorithm expert. Score the case for likelihood of acute pathology "
+        _LANG_LOCK
+        + "You are an algorithm expert. Score the case for likelihood of acute pathology "
         "requiring interruption of workflow. Return ONE JSON: "
-        "{summary: Arabic, urgency_score: float 0-1, rationale: Arabic string, confidence: float}. "
-        "NO prose outside JSON."
+        "{summary: English, urgency_score: float 0-1, rationale: English string, confidence: float}. "
+        "NO prose outside JSON. NO Arabic characters."
     ),
 }
 
@@ -100,31 +118,134 @@ def _parse_agent_json(raw: str) -> tuple[dict[str, Any] | None, float | None, st
     return obj, conf, str(summary)[:400] if summary else None
 
 
-def _call_naraya_sync(system_prompt: str, user_prompt: str, timeout: float = 45.0) -> str:
-    """Sync httpx call — needed because pybreaker.call_async requires tornado (not installed).
-    We wrap this in asyncio.to_thread() from the async caller to keep the event loop free.
-    Concurrency is preserved because fan_out() gathers threads across agents."""
+OLLAMA_URL = os.getenv("OLLAMA_URL", "")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
+
+
+def _call_ollama_sync(system_prompt: str, user_prompt: str, timeout: float = 60.0) -> str:
+    """Local LLM fallback via Ollama /api/chat. Only used when OLLAMA_URL is set
+    AND Naraya has failed (permanent error or missing key)."""
     body = {
-        "model": NARAYA_MODEL,
+        "model": OLLAMA_MODEL,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        "max_tokens": 700,
-        "temperature": 0.2,
+        "stream": False,
+        "options": {"temperature": 0.2},
+    }
+    with httpx.Client(timeout=timeout) as client:
+        r = client.post(f"{OLLAMA_URL.rstrip('/')}/api/chat", json=body)
+        r.raise_for_status()
+        data = r.json()
+    msg = data.get("message") or {}
+    text = msg.get("content", "")
+    if not text:
+        raise RuntimeError(f"Ollama empty message: {data}")
+    return text
+
+
+_GLOBAL_ENGLISH_PREAMBLE = (
+    "You must respond in clinical English ONLY. Never write Arabic or any "
+    "other language in your response — even if the user's input contains "
+    "Arabic. Understand Arabic input internally, but always reply in native "
+    "clinical English.\n\n"
+)
+
+
+def _call_naraya_sync(
+    system_prompt: str,
+    user_prompt: str,
+    timeout: float = 45.0,
+    model: str | None = None,
+    max_tokens: int = 700,
+    temperature: float = 0.2,
+) -> str:
+    """Sync httpx call — needed because pybreaker.call_async requires tornado (not installed).
+    We wrap this in asyncio.to_thread() from the async caller to keep the event loop free.
+    Concurrency is preserved because fan_out() gathers threads across agents.
+
+    `model` overrides the default NARAYA_MODEL — used by high-stakes endpoints
+    (Impression, Critical Alert, Compare) to pick claude-opus-4.7 / claude-sonnet-5.
+
+    English enforcement: prepends a strong preamble unless the system prompt
+    already contains "translate" or "Arabic" (the translate endpoint needs
+    those to work).
+    """
+    sys_prompt = system_prompt
+    lower = system_prompt.lower()
+    if "translate" not in lower and "arabic" not in lower and "modern standard" not in lower:
+        sys_prompt = _GLOBAL_ENGLISH_PREAMBLE + system_prompt
+    body = {
+        "model": model or NARAYA_MODEL,
+        "messages": [
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        "max_tokens": max_tokens,
+        "temperature": temperature,
     }
     headers = {
         "Authorization": f"Bearer {_naraya_key()}",
         "Content-Type": "application/json",
     }
-    with httpx.Client(timeout=timeout) as client:
-        r = client.post(f"{NARAYA_BASE}/chat/completions", json=body, headers=headers)
-        r.raise_for_status()
-        data = r.json()
-    choices = data.get("choices") or []
-    if not choices:
-        raise RuntimeError(f"Naraya empty choices: {data}")
-    return choices[0]["message"]["content"]
+    # Retry loop for transient 429 (per-minute rate limit) and 5xx errors.
+    # Free-tier Naraya frequently 429s under bursty load (case-story + generate-
+    # final-report both call within seconds). Honor Retry-After when present,
+    # otherwise use exponential backoff. Cap total attempts to keep worst-case
+    # latency bounded.
+    MAX_ATTEMPTS = 4
+    BACKOFF = [1.5, 3.0, 6.0]  # seconds between attempts
+    last_err: Exception | None = None
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            with httpx.Client(timeout=timeout) as client:
+                r = client.post(f"{NARAYA_BASE}/chat/completions", json=body, headers=headers)
+            # Retryable status codes
+            if r.status_code in (429, 502, 503, 504):
+                if attempt < MAX_ATTEMPTS:
+                    wait_s = BACKOFF[attempt - 1]
+                    retry_after = r.headers.get("retry-after", "")
+                    try:
+                        ra = float(retry_after)
+                        wait_s = min(30.0, max(wait_s, ra))
+                    except (TypeError, ValueError):
+                        pass
+                    log.warning(
+                        "Naraya %s (attempt %d/%d) — sleeping %.1fs then retrying",
+                        r.status_code, attempt, MAX_ATTEMPTS, wait_s,
+                    )
+                    time.sleep(wait_s)
+                    continue
+                # Final attempt failed — raise a clean error
+                r.raise_for_status()
+            r.raise_for_status()
+            data = r.json()
+            choices = data.get("choices") or []
+            if not choices:
+                raise RuntimeError(f"Naraya empty choices: {data}")
+            return choices[0]["message"]["content"]
+        except httpx.HTTPError as e:
+            last_err = e
+            # Non-status HTTPErrors (timeouts, connection reset): retry too
+            if attempt < MAX_ATTEMPTS and not isinstance(e, httpx.HTTPStatusError):
+                wait_s = BACKOFF[attempt - 1]
+                log.warning(
+                    "Naraya HTTPError (attempt %d/%d): %s — sleeping %.1fs",
+                    attempt, MAX_ATTEMPTS, str(e)[:120], wait_s,
+                )
+                time.sleep(wait_s)
+                continue
+            break
+        except RuntimeError as e:
+            last_err = e
+            break
+
+    # All retries exhausted — try Ollama fallback if configured, else raise
+    if OLLAMA_URL:
+        log.warning("Naraya exhausted (%s), trying Ollama fallback", last_err)
+        return _call_ollama_sync(system_prompt, user_prompt, timeout)
+    raise last_err or RuntimeError("Naraya call failed with no captured error")
 
 
 async def call_agent(agent: str, user_prompt: str) -> AgentOutput:

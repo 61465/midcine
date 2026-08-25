@@ -8,8 +8,8 @@ import dynamic from 'next/dynamic';
 export const DicomViewer = dynamic(() => import('./dicom-viewer').then((m) => m.DicomViewer), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full items-center justify-center bg-black text-gray-400">
-      جارٍ تجهيز عارض DICOM…
+    <div className="flex h-full items-center justify-center bg-black text-slate-400">
+      Preparing DICOM viewer…
     </div>
   ),
 });

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-
-const BRIDGE_URL = process.env.MCP_BRIDGE_URL ?? 'http://localhost:8210';
+import { bridgeFetch } from '../../../../../lib/bridge-fetch';
 
 export async function POST(req: Request) {
-  const body = await req.text();
-  const r = await fetch(`${BRIDGE_URL}/report/sign`, {
+  const _buf = await req.arrayBuffer();
+  const body = new TextDecoder("utf-8").decode(_buf);
+  const r = await bridgeFetch(`/report/sign`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body,

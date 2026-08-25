@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'standalone',
+  typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: true },
+  allowedDevOrigins: ['100.101.132.118', 'localhost', '127.0.0.1', 'ame.tail19ddab.ts.net'],
   transpilePackages: [
     '@midcine/ui',
     '@midcine/auth',

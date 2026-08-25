@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import { AnatomyLab } from '../_components/anatomy/anatomy-lab';
+import { ConsoleFilter } from '../_components/anatomy/console-filter';
 
 export const metadata = {
   title: 'midcine — Pathology Atlas',
@@ -28,6 +29,7 @@ export default function AnatomyPage() {
           </span>
         </div>
       </header>
+      <ConsoleFilter />
       <div className="mx-auto max-w-7xl">
         <AnatomyLab />
       </div>

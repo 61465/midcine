@@ -1,0 +1,64 @@
+# One-shot compose for hospitals or private clinics.
+# Usage:
+#   1. Copy .env.example to .env and fill NARAYA_API_KEY
+#   2. docker compose up -d
+#   3. Open http://localhost:3000
+#
+# Volumes persist studies, patients, reports, DICOMs across restarts.
+# Bind mounts point to `./data/*` on the host so you can back them up with rsync.
+
+services:
+  bridge:
+    build:
+      context: ./services/mcp-bridge
+      dockerfile: Dockerfile
+    container_name: midcine-bridge
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8210:8210"
+    environment:
+      - NARAYA_BASE=${NARAYA_BASE:-https://router.bynara.id/v1}
+      - NARAYA_MODEL=${NARAYA_MODEL:-mistral-medium-3-5}
+      - NARAYA_MODEL_IMPRESSION=${NARAYA_MODEL_IMPRESSION:-mistral-medium-3-5}
+      - NARAYA_MODEL_CRITICAL=${NARAYA_MODEL_CRITICAL:-mistral-medium-3-5}
+      - NARAYA_MODEL_COMPARE=${NARAYA_MODEL_COMPARE:-mistral-medium-3-5}
+      - NARAYA_API_KEY=${NARAYA_API_KEY}
+      - MIDCINE_STUDIES_DIR=/data/studies
+      - MIDCINE_DICOMS_DIR=/data/dicoms
+      - MIDCINE_PATIENTS_DIR=/data/patients
+      - MIDCINE_REPORTS_DIR=/data/reports
+      - MIDCINE_AUDIT_DIR=/data/audit
+    volumes:
+      - ./data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; assert httpx.get('http://localhost:8210/health').status_code == 200"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: midcine-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - MCP_BRIDGE_URL=http://bridge:8210
+      - NEXT_PUBLIC_MIDCINE_SESSION_LOCK_MIN=${MIDCINE_SESSION_LOCK_MIN:-15}
+    depends_on:
+      bridge:
+        condition: service_healthy
+
+  # Optional Orthanc PACS for hospitals that want a real DICOM store.
+  # Uncomment + rebuild to enable.
+  # orthanc:
+  #   image: orthancteam/orthanc:latest
+  #   container_name: midcine-orthanc
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8042:8042"    # Web UI + DICOMweb
+  #     - "4242:4242"    # C-STORE SCP
+  #   volumes:
+  #     - ./data/orthanc:/var/lib/orthanc/db

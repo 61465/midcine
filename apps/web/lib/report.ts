@@ -36,7 +36,7 @@ export async function generateReport(
 ): Promise<FinalReport> {
   const r = await fetch(`${BRIDGE_PROXY}/report/generate`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
     body: JSON.stringify({ study, aggregate, outputs }),
   });
   if (!r.ok) throw new Error(`generate failed ${r.status}`);
@@ -50,7 +50,7 @@ export async function signReport(
 ): Promise<FinalReport> {
   const r = await fetch(`${BRIDGE_PROXY}/report/sign`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
     body: JSON.stringify({ report, signed_by, license_no }),
   });
   if (!r.ok) throw new Error(`sign failed ${r.status}`);
@@ -78,10 +78,33 @@ export async function sendReportOnWhatsApp(
 ): Promise<WhatsAppMessage> {
   const r = await fetch(`${BRIDGE_PROXY}/whatsapp/send`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
     body: JSON.stringify({ report, to_phone, to_name, kind }),
   });
   if (!r.ok) throw new Error(`whatsapp send failed ${r.status}`);
+  return r.json();
+}
+
+export interface ImpressionRequest {
+  findings: string;
+  modality?: string;
+  body_part?: string;
+  patient_age?: number | null;
+  patient_sex?: string | null;
+  symptoms?: string;
+  clinical_history?: string;
+  prior_impression?: string;
+}
+
+export async function generateImpression(
+  req: ImpressionRequest,
+): Promise<{ ok: boolean; impression: string; latency_ms?: number; error?: string }> {
+  const r = await fetch(`${BRIDGE_PROXY}/ai/impression`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    body: JSON.stringify(req),
+  });
+  if (!r.ok) return { ok: false, impression: '', error: `HTTP ${r.status}` };
   return r.json();
 }
 

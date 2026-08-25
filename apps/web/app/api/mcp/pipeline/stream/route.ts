@@ -1,10 +1,10 @@
 // SSE proxy to bridge /pipeline/stream. Streams agent-by-agent AI results.
-
-const BRIDGE_URL = process.env.MCP_BRIDGE_URL ?? 'http://localhost:8210';
+import { bridgeFetch } from '../../../../../lib/bridge-fetch';
 
 export async function POST(req: Request) {
-  const body = await req.text();
-  const upstream = await fetch(`${BRIDGE_URL}/pipeline/stream`, {
+  const _buf = await req.arrayBuffer();
+  const body = new TextDecoder("utf-8").decode(_buf);
+  const upstream = await bridgeFetch(`/pipeline/stream`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body,
