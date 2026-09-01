@@ -1,0 +1,35 @@
+{
+  "name": "تطور الأشعة المقطعية - CT Evolution",
+  "short_name": "CT Evolution",
+  "description": "تطبيق تفاعلي يستعرض تطور تكنولوجيا الأشعة المقطعية عبر الزمن بطريقة الواقع المعزز",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#05070a",
+  "theme_color": "#0a0e17",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%2300d4ff'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle' fill='%23050a0f'%3E🩻%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%2300d4ff'/%3E%3Ctext x='256' y='350' font-size='280' text-anchor='middle' fill='%23050a0f'%3E🩻%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["medical", "education", "technology"],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='390' height='844' viewBox='0 0 390 844'%3E%3Crect width='390' height='844' fill='%2305070a'/%3E%3Ctext x='195' y='422' font-size='40' text-anchor='middle' fill='%23fff'%3E🩻 CT Evolution%3C/text%3E%3C/svg%3E",
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ]
+}
