@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#030712">
+  <title>CT Evolution — PACS Workstation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // Only load manifest and service worker on http/https to prevent file:// protocol CORS errors
+    if (location.protocol.startsWith('http')) {
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = 'manifest.json';
+      document.head.appendChild(link);
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(() => {});
+        });
+      }
+    }
+  </script>
+</head>
+<body>
+
+<!-- ============================================================
+  SPLASH SCREEN
+  ============================================================ -->
+<div id="splash" class="splash">
+  <div class="splash-inner">
+    <div class="splash-logo">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <rect width="48" height="48" rx="12" fill="#06b6d4" opacity="0.15"/>
+        <circle cx="24" cy="24" r="18" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <circle cx="24" cy="24" r="10" stroke="#06b6d4" stroke-width="1" opacity="0.5"/>
+        <line x1="6" y1="24" x2="42" y2="24" stroke="#06b6d4" stroke-width="1" opacity="0.3"/>
+        <line x1="24" y1="6" x2="24" y2="42" stroke="#06b6d4" stroke-width="1" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="splash-wordmark">CT<span>EVOLUTION</span></div>
+    <div class="splash-tagline">PACS Workstation · Senior DICOM Viewer</div>
+    <div class="splash-bar-track"><div class="splash-bar-fill" id="splashFill"></div></div>
+    <div class="splash-step" id="splashStep">تهيئة محرك الأشعة...</div>
+  </div>
+</div>
+
+<!-- ============================================================
+  ROOT LAYOUT
+  ============================================================ -->
+<div id="app" class="app hidden">
+
+  <!-- ─── TOP BAR ───────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <!-- Logo -->
+      <div class="logo">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="11" r="10" stroke="#06b6d4" stroke-width="1.5"/>
+          <circle cx="11" cy="11" r="5"  stroke="#06b6d4" stroke-width="1" opacity=".5"/>
+          <line x1="1"  y1="11" x2="21" y2="11" stroke="#06b6d4" stroke-width="1" opacity=".4"/>
+          <line x1="11" y1="1"  x2="11" y2="21" stroke="#06b6d4" stroke-width="1" opacity=".4"/>
+        </svg>
+        <span class="logo-text">CT<b>EVOLUTION</b></span>
+        <span class="logo-badge">SENIOR PACS</span>
+      </div>
+
+      <!-- Scan Selector -->
+      <div class="scan-select-wrap">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <select id="scanSelect">
+          <option value="brain" selected>🧠 Brain CT — أشعة الدماغ المحورية 512×512</option>
+          <option value="chest">🫁 Chest HRCT — التصوير عالي الدقة للرئة</option>
+          <option value="chest_standard">🫁 Chest Standard — الصدر الواسع</option>
+          <option value="spine">🦴 Spine 3D CT — الفقرات القطنية ثلاثي الأبعاد</option>
+          <option value="abdomen">🩺 Abdomen CT — البطن بالتباين</option>
+          <option value="cardiac">🫀 Cardiac Angio CT — الشرايين التاجية</option>
+          <option value="angiography">🩸 CTA Coronary — تصوير الأوعية بالتباين</option>
+          <option value="sinus">👃 Sinus CT — الجيوب الأنفية (تاجي)</option>
+          <option value="historical_1971">📜 1971 — أول أشعة مقطعية في التاريخ (EMI)</option>
+          <option value="polytrauma">🩻 Polytrauma — أشعة جسم كامل 3D CT</option>
+          <option value="pet">🌡️ PET Brain Scan — التصوير الجزيئي</option>
+          <option value="multiparametric_4d">🌌 Brain Multi-Parametric 4D — دراسة الرنين والطيف المتعدد (35 مقطعاً)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <!-- Direct Link to Midcine Platform -->
+      <a href="https://61465.github.io/midcine/" target="_blank" rel="noopener noreferrer" class="btn-topbar btn-midcine" title="الانتقال المباشر إلى منصة Midcine الطبية">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        منصة Midcine ↗
+      </a>
+      <!-- Upload real DICOM/image -->
+      <label class="btn-topbar btn-green" title="رفع صورة أشعة حقيقية من جهازك">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        فتح ملف / صورة
+        <input type="file" id="fileInput" accept="image/*,.dcm" style="display:none">
+      </label>
+      <!-- Curtain Split Swipe Mode -->
+      <button class="btn-topbar btn-cyan-glow" id="btnCurtain" title="ستارة المقارنة التفاعلية: اسحب لمقارنة القديم والحديث مباشرة">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><polyline points="8 8 4 12 8 16"/><polyline points="16 8 20 12 16 16"/></svg>
+        ستارة المقارنة (Curtain)
+      </button>
+      <!-- DICOM Tags Inspector -->
+      <button class="btn-topbar" id="btnDicomTags" title="DICOM Header Tags Inspector">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        DICOM Tags
+      </button>
+      <!-- Compare toggle -->
+      <button class="btn-topbar" id="btnCompare" title="تقسيم الشاشة: مقارنة بين عصرين جنباً إلى جنب">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18"/><rect x="14" y="3" width="7" height="18"/></svg>
+        مقارنة العصور (2×)
+      </button>
+      <!-- Scientific Panel -->
+      <button class="btn-topbar btn-primary" id="btnSciPanel" title="الدليل العلمي والتطور التاريخي ومستقبل الأشعة">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        الدليل العلمي والمستقبل
+      </button>
+      <!-- Export -->
+      <button class="btn-topbar" id="btnExport" title="تصدير لقطة الفحص">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        تصدير PNG
+      </button>
+    </div>
+  </header>
+
+  <!-- ─── TOOLBAR ──────────────────────────────────────────── -->
+  <div class="toolbar">
+    <!-- View mode -->
+    <div class="toolbar-group">
+      <span class="tb-label">عرض</span>
+      <button class="tb-btn active" data-view="single" id="viewSingle">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1"/></svg>
+        Single
+      </button>
+      <button class="tb-btn" data-view="mpr" id="viewMpr">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
+        MPR 2×2
+      </button>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <!-- Tools -->
+    <div class="toolbar-group">
+      <span class="tb-label">أداة</span>
+      <button class="tb-btn active" data-tool="pan" id="toolPan">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M12 12v.01"/><path d="M3 12h18M12 3v18"/></svg>
+        تحريك
+      </button>
+      <button class="tb-btn" data-tool="ruler" id="toolRuler">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+        مسطرة mm
+      </button>
+      <button class="tb-btn" data-tool="hu" id="toolHu">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        مسبار HU
+      </button>
+      <button class="tb-btn" data-tool="ai_cad" id="toolAiCad" title="تشخيص الذكاء الاصطناعي وتحديد البنى المرضية">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+        🤖 كشف AI
+      </button>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <!-- Window presets -->
+    <div class="toolbar-group">
+      <span class="tb-label">نافذة</span>
+      <button class="tb-btn preset-btn" data-wl="40"  data-ww="400">Soft</button>
+      <button class="tb-btn preset-btn" data-wl="500" data-ww="1800">Bone</button>
+      <button class="tb-btn preset-btn" data-wl="-600" data-ww="1500">Lung</button>
+      <button class="tb-btn preset-btn" data-wl="35"  data-ww="80">Brain</button>
+      <button class="tb-btn preset-btn" data-wl="300" data-ww="600">Angio</button>
+      <button class="tb-btn preset-btn" data-wl="128" data-ww="256">4D Matrix</button>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <!-- Colormap -->
+    <div class="toolbar-group">
+      <span class="tb-label">لون</span>
+      <select id="colormapSelect" class="tb-select">
+        <option value="gray">Gray (Grayscale)</option>
+        <option value="inverted">Inverted (X-Ray)</option>
+        <option value="bone">Bone (Osseous)</option>
+        <option value="hot">Hot (Angio/Heat)</option>
+        <option value="pet">PET (Metabolic)</option>
+        <option value="spectral">Spectral (Photon-Count)</option>
+      </select>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <!-- Rotate/Flip -->
+    <div class="toolbar-group">
+      <button class="tb-btn" id="btnRotCcw" title="تدوير 90° يسار">⟲</button>
+      <button class="tb-btn" id="btnRotCw"  title="تدوير 90° يمين">⟳</button>
+      <button class="tb-btn" id="btnFlip"   title="عكس أفقي">⇄</button>
+      <button class="tb-btn tb-reset" id="btnReset" title="إعادة ضبط العرض">↺ Reset</button>
+    </div>
+
+    <!-- Physics HUD (right side) -->
+    <div class="tb-physics" id="tbPhysics">
+      <div class="phy-item"><span class="phy-k">Dose</span><span class="phy-v" id="phyDose">1.5 mSv</span></div>
+      <div class="phy-item"><span class="phy-k">Speed</span><span class="phy-v" id="phySpeed">0.15s</span></div>
+      <div class="phy-item"><span class="phy-k">Matrix</span><span class="phy-v" id="phyMatrix">512²</span></div>
+      <div class="phy-item"><span class="phy-k">Recon</span><span class="phy-v" id="phyRecon">DLR/AI</span></div>
+    </div>
+  </div>
+
+  <!-- ─── ADVANCED SPECTRAL & PHOTON-COUNTING SUB-TOOLBAR ───── -->
+  <div class="spectral-bar" id="spectralBar">
+    <div class="spec-bar-label">
+      <span class="spec-badge">4D MATRIX SPECTRAL</span>
+      <span>الطيف والتروية المتعددة:</span>
+    </div>
+    <div class="spec-bar-group">
+      <span class="spec-sublabel">السلاسل الطيفية (Sequences):</span>
+      <button class="spec-btn active" data-seq="all" title="مصفوفة الفحص الكاملة 35 مقطعاً">35-Slice Matrix</button>
+      <button class="spec-btn" data-seq="flair" title="T2 FLAIR: إشارة وذمة الأنسجة والميالين">T2 FLAIR</button>
+      <button class="spec-btn" data-seq="dwi" title="DWI b:1000: كشف الجلطات الحادة">⚡ DWI (b:1000)</button>
+      <button class="spec-btn" data-seq="adc" title="ADC: خريطة انتشار جزيئات الماء الكمية">ADC Map</button>
+      <button class="spec-btn" data-seq="cbf" title="CBF: خريطة التروية الدموية (0-150 ml/100g/min)">🌈 CBF Perfusion</button>
+      <button class="spec-btn" data-seq="swi" title="SWI: الأوعية المجهرية والنزيف">🩸 SWI</button>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="spec-bar-group">
+      <span class="spec-sublabel">الطاقة (keV):</span>
+      <button class="spec-btn" data-kev="40">40 keV (Iodine+)</button>
+      <button class="spec-btn active" data-kev="70">70 keV (Std)</button>
+      <button class="spec-btn" data-kev="100">100 keV</button>
+      <button class="spec-btn" data-kev="140">140 keV</button>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="spec-bar-group">
+      <span class="spec-sublabel">تفكيك المادة:</span>
+      <button class="spec-btn active" data-mat="std">كامل الأنسجة</button>
+      <button class="spec-btn" data-mat="iodine">🧪 خريطة اليود</button>
+      <button class="spec-btn" data-mat="vnc">🦴 حجب الكالسيوم</button>
+      <button class="spec-btn" data-mat="kedge">🎯 النانو الجزيئي</button>
+    </div>
+  </div>
+
+  <!-- ─── MAIN WORKSPACE ────────────────────────────────────── -->
+  <div class="workspace">
+
+    <!-- VIEWPORT AREA -->
+    <div class="viewport-area" id="viewportArea">
+
+      <!-- Primary viewport -->
+      <div class="viewport" id="viewportPrimary">
+        <!-- Orientation markers -->
+        <div class="orient-marker orient-a">A</div>
+        <div class="orient-marker orient-p">P</div>
+        <div class="orient-marker orient-l">L</div>
+        <div class="orient-marker orient-r">R</div>
+
+        <!-- Primary Canvas -->
+        <canvas id="primaryCanvas" class="dicom-canvas"></canvas>
+
+        <!-- Curtain Split Overlay (Interactive Swipe Comparison) -->
+        <div class="curtain-overlay hidden" id="curtainOverlay">
+          <canvas id="curtainCanvas" class="curtain-canvas"></canvas>
+          <div class="curtain-line" id="curtainLine">
+            <div class="curtain-handle" id="curtainHandle">
+              <span>◀▶</span>
+            </div>
+          </div>
+          <div class="curtain-badge curtain-badge-left" id="curtainBadgeLeft">1972 EMI Mark I</div>
+          <div class="curtain-badge curtain-badge-right" id="curtainBadgeRight">2024 AI / 2035 PCD</div>
+        </div>
+
+        <!-- AI CAD Findings Overlay (Bounding Boxes & Pathology) -->
+        <svg class="ai-overlay hidden" id="aiOverlay" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:18;"></svg>
+
+        <!-- Telemetry & Physics Metrics Comparator -->
+        <div class="telemetry-box" id="telemetryBox">
+          <div class="tel-head">📊 المقارنة الفيزيائية الحية: <span id="telEraName">1972 ↔ 2024</span></div>
+          <div class="tel-row">
+            <span class="tel-label">الجرعة الإشعاعية:</span>
+            <div class="tel-bar-wrap"><div class="tel-bar-fill tel-dose" id="telDoseBar" style="width:100%"></div></div>
+            <span class="tel-val" id="telDoseVal">20 mSv ➔ 1.5 mSv (-92.5%)</span>
+          </div>
+          <div class="tel-row">
+            <span class="tel-label">الدقة المكانية:</span>
+            <div class="tel-bar-wrap"><div class="tel-bar-fill tel-res" id="telResBar" style="width:90%"></div></div>
+            <span class="tel-val" id="telResVal">3.0 mm ➔ 0.24 mm (+12.5×)</span>
+          </div>
+          <div class="tel-row">
+            <span class="tel-label">سرعة المسح:</span>
+            <div class="tel-bar-wrap"><div class="tel-bar-fill tel-speed" id="telSpeedBar" style="width:98%"></div></div>
+            <span class="tel-val" id="telSpeedVal">300s ➔ 0.15s (2000× أسرع)</span>
+          </div>
+          <div class="tel-row">
+            <span class="tel-label">نسبة الإشارة (SNR):</span>
+            <div class="tel-bar-wrap"><div class="tel-bar-fill tel-snr" id="telSnrBar" style="width:80%"></div></div>
+            <span class="tel-val" id="telSnrVal">12 dB ➔ 48 dB (نقاء فائق)</span>
+          </div>
+        </div>
+
+        <!-- HUD overlay (DICOM-style patient header) -->
+        <div class="hud">
+          <div class="hud-tl">
+            <div class="hud-line hud-strong" id="hudPatient">PATIENT: ANONYMIZED^A</div>
+            <div class="hud-line" id="hudPatientId">ID: CT-2026-0001 · 054Y M</div>
+            <div class="hud-line hud-cyan" id="hudModality">CT · Axial · 120 kVp · 200 mAs</div>
+            <div class="hud-line" id="hudStudyDate">Study: 2026-09-01</div>
+          </div>
+          <div class="hud-tr">
+            <div class="hud-line" id="hudHospital">GENERAL RADIOLOGY DEPT.</div>
+            <div class="hud-line hud-cyan" id="hudWWWL">WL: 40  WW: 400</div>
+            <div class="hud-line" id="hudZoom">Zoom: 1.0×</div>
+            <div class="hud-line" id="hudSliceNum">Slice: 8 / 16</div>
+          </div>
+          <div class="hud-bl">
+            <div class="hu-probe" id="huProbeDisplay">HU: — · tissue: —</div>
+          </div>
+          <div class="hud-br">
+            <div class="hud-line hud-mono" id="hudMatrix">512×512 · Int16</div>
+            <div class="hud-line" id="hudReconHud">Recon: Deep Learning (AI)</div>
+          </div>
+        </div>
+
+        <!-- Scanner sweep line -->
+        <div class="sweep-line" id="sweepLine"></div>
+
+        <!-- Ruler overlay (drawn separately) -->
+        <svg class="ruler-svg" id="rulerSvg" style="pointer-events:none;position:absolute;inset:0;width:100%;height:100%;z-index:20;"></svg>
+      </div>
+
+      <!-- Secondary viewport (compare mode) -->
+      <div class="viewport viewport-secondary hidden" id="viewportSecondary">
+        <div class="orient-marker orient-a">A</div>
+        <div class="orient-marker orient-p">P</div>
+        <div class="orient-marker orient-l">L</div>
+        <div class="orient-marker orient-r">R</div>
+        <canvas id="secondaryCanvas" class="dicom-canvas"></canvas>
+        <div class="hud">
+          <div class="hud-tl">
+            <div class="hud-line hud-strong">COMPARE MODE</div>
+            <div class="hud-line hud-cyan" id="hudEraSecondary">—</div>
+          </div>
+          <div class="hud-tr">
+            <div class="hud-line" id="hudMatrixSec">—</div>
+          </div>
+        </div>
+        <!-- Era selector for secondary -->
+        <div class="sec-era-select">
+          <label>قارن مع:</label>
+          <select id="secondaryEraSelect">
+            <option value="era1">1972 — EMI Pencil Beam</option>
+            <option value="era2">1982 — Fan Beam</option>
+            <option value="era3">1998 — Helical CT</option>
+            <option value="present" selected>2024 — AI Multi-Slice</option>
+            <option value="future">2035 — Photon Counting</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── CINE SLIDER ────────────────────────────────────── -->
+    <div class="cine-bar">
+      <button class="cine-play-btn" id="cinePrev">‹</button>
+      <button class="cine-play-btn cine-main" id="cinePlay">▶</button>
+      <button class="cine-play-btn" id="cineNext">›</button>
+      <div class="cine-track-wrap">
+        <input type="range" id="sliceSlider" min="1" max="16" value="8" class="cine-slider">
+        <div class="cine-pos" id="cinePosLabel">Slice 8 · SL −45.0 mm</div>
+      </div>
+      <div class="fps-group">
+        <button class="fps-btn active" data-fps="5">5×</button>
+        <button class="fps-btn" data-fps="15">15×</button>
+        <button class="fps-btn" data-fps="30">30×</button>
+      </div>
+    </div>
+
+    <!-- ─── TIMELINE ───────────────────────────────────────── -->
+    <nav class="era-nav">
+      <div class="era-label">تطور التكنولوجيا:</div>
+      <div class="era-track">
+        <div class="era-line"></div>
+        <button class="era-btn" data-era="era1">
+          <span class="era-dot"></span>
+          <span class="era-year">1972</span>
+          <span class="era-name">الجيل الأول</span>
+          <span class="era-tech">Pencil Beam · 80²</span>
+        </button>
+        <button class="era-btn" data-era="era2">
+          <span class="era-dot"></span>
+          <span class="era-year">1982</span>
+          <span class="era-name">الجيل الثالث</span>
+          <span class="era-tech">Fan Beam · 256²</span>
+        </button>
+        <button class="era-btn" data-era="era3">
+          <span class="era-dot"></span>
+          <span class="era-year">1998</span>
+          <span class="era-name">الحلزوني</span>
+          <span class="era-tech">Helical · 512²</span>
+        </button>
+        <button class="era-btn active" data-era="present">
+          <span class="era-dot"></span>
+          <span class="era-year">2024</span>
+          <span class="era-name">التصوير المتقدم</span>
+          <span class="era-tech">640-Slice AI · 512²</span>
+        </button>
+        <button class="era-btn" data-era="future">
+          <span class="era-dot"></span>
+          <span class="era-year">2035+</span>
+          <span class="era-name">العد والطيف 4D</span>
+          <span class="era-tech">Multi-Parametric · 1024²</span>
+        </button>
+      </div>
+    </nav>
+
+  </div><!-- /workspace -->
+
+</div><!-- /app -->
+
+<!-- ============================================================
+  SCIENTIFIC SIDE PANEL (Drawer)
+  ============================================================ -->
+<aside class="sci-panel" id="sciPanel">
+  <div class="sci-panel-head">
+    <span>📖 الدليل العلمي والتاريخي ومستقبل الأشعة</span>
+    <button class="sci-close" id="sciClose">✕</button>
+  </div>
+
+  <div class="sci-tabs">
+    <button class="sci-tab active" data-tab="future_tech">✨ ثورة 2035 (PCD & AI)</button>
+    <button class="sci-tab" data-tab="physics">الفيزياء والتطور</button>
+    <button class="sci-tab" data-tab="algorithms">الخوارزميات</button>
+    <button class="sci-tab" data-tab="research">أبحاث 2025</button>
+    <button class="sci-tab" data-tab="report">التقرير الطبي</button>
+  </div>
+
+  <div class="sci-body">
+    <!-- FUTURE TECH DEEP DIVE TAB -->
+    <div class="sci-pane active" id="paneFutureTech">
+      <div class="era-card" style="border-color:rgba(6,182,212,.5);background:linear-gradient(135deg,rgba(6,182,212,.15),transparent)">
+        <div class="era-card-badge">2035+</div>
+        <div class="era-card-title">🔬 ما هو العد الفوتوني (Photon-Counting CT) وكيف يغير الطب؟</div>
+        <div class="era-card-tech">Direct Conversion CdTe / CZT · Zero Electronic Noise · Spectral K-Edge</div>
+      </div>
+
+      <div class="sci-section">
+        <div class="sci-section-title">⚡ 1. التحويل المباشر: وداعاً لكواشف الوميض القديمة</div>
+        <p class="sci-text">
+          في جميع أجهزة الأشعة المقطعية من 1972 وحتى اليوم (Energy-Integrating Detectors - EID)، تسقط أشعة X على مادة وميضية (Scintillator مثل GOS)، فتتحول إلى ضوء مرئي، ثم إلى إلكترونات عبر صمام ثنائي (Photodiode). هذه الخطوة الوسيطة تسبب <b>تشتت الضوء وفقدان معلومات طاقة كل فوتون، وتنتج ضوضاء إلكترونية عالية</b>.
+          <br><br>
+          في أجهزة <b>العد الفوتوني (PCD)</b>، تُستخدم بلورات أشباه موصلات من <b>تيلوريد الكادميوم (CdTe)</b> تحوّل فوتون الأشعة السينية مباشرة إلى نبضة كهربائية فورية <b>(Direct Conversion)</b>. النتيجة: قياس عدد الفوتونات بدقة 100% وقياس طاقة كل فوتون بمفرده!
+        </p>
+      </div>
+
+      <div class="sci-section sci-highlight">
+        <div class="sci-section-title">🛡️ 2. كيف تختفي الضوضاء وتنخفض الجرعة الإشعاعية 90%؟</div>
+        <p class="sci-text">
+          تحتوي كواشف PCD على عتبات طاقة إلكترونية <b>(Energy Thresholds)</b>. يتم ضبط العتبة الدنيا عند 20 keV لتجاهل كل النبضات الكهربائية الناتجة عن الحرارة والضوضاء الإلكترونية لكاشف السيليكون.
+          <br>
+          <b>النتيجة:</b> تصبح الضوضاء الإلكترونية = 0 تماماً. هذا يمكّن من خفض الجرعة الإشعاعية إلى <b>0.1 mSv فقط</b> (ما يعادل جرعة صورة صدر عادية بسيطة) مع الحصول على صورة أنقى بـ 10 أضعاف!
+        </p>
+      </div>
+
+      <div class="sci-section">
+        <div class="sci-section-title">🌈 3. تفكيك المادة الطيفي (Spectral Material Decomposition)</div>
+        <p class="sci-text">
+          بفضل قياس طاقة كل فوتون وتوزيعه على 4 إلى 8 حزم طاقية (Energy Bins):
+          <br>
+          • <b>خريطة اليود (Iodine Map):</b> عزل وتلوين التروية الدموية للأورام والجلطات بدون تداخل مع العظام.
+          • <b>حجب الكالسيوم (Calcium Suppression):</b> رؤية بطانة الشرايين التاجية المتكلسة بدقة متناهية والتأكد من خلوها من الانسداد.
+          • <b>حجب التباين الافتراضي (Virtual Non-Contrast - VNC):</b> الحصول على صورة بدون صبغة وصورة بصبغة من نفس الفحص بضربة واحدة دون تكرار تعريض المريض للإشعاع!
+        </p>
+      </div>
+
+      <div class="sci-section">
+        <div class="sci-section-title">🤖 4. الذكاء الاصطناعي العصبي وإعادة البناء (Neural DLR)</div>
+        <p class="sci-text">
+          بدلاً من خوارزميات رادون وFBP الرياضية القديمة التي تتأثر بالمعادن والحركة، تُستخدم شبكات عصبية عميقة (Deep Learning Recon) تم تدريبها على ملايين المقاطع فائقة النقاء. تفصل الشبكة الإشارات التشريحية عن التشتت اللامتوقع وتكشف الميكرو-تكلسات والآفات المبكرة تلقائياً (AI CAD).
+        </p>
+      </div>
+    </div>
+
+    <!-- PHYSICS TAB -->
+    <div class="sci-pane" id="panePhysics">
+      <div class="era-card" id="eraCard">
+        <div class="era-card-badge" id="eraCardYear">2024</div>
+        <div class="era-card-title" id="eraCardTitle">التصوير المتقدم: SOMATOM AI</div>
+        <div class="era-card-tech" id="eraCardTech">640 Multi-Slice / Deep Learning Recon</div>
+      </div>
+
+      <div class="sci-section">
+        <div class="sci-section-title">⚡ آلية توليد الأشعة وحركة المسح</div>
+        <p id="sciPhysicsText" class="sci-text">...</p>
+      </div>
+
+      <div class="sci-section">
+        <div class="sci-section-title">🔬 المعايير والمواصفات التقنية</div>
+        <div class="specs-grid" id="sciSpecsGrid">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <div class="sci-section sci-highlight">
+        <div class="sci-section-title">💡 مقارنة بالحقب الأخرى</div>
+        <p id="sciCompareText" class="sci-text">...</p>
+      </div>
+    </div>
+
+    <!-- ALGORITHMS TAB -->
+    <div class="sci-pane" id="paneAlgorithms">
+      <div class="sci-section">
+        <div class="sci-section-title">📐 تحويل رادون والفلترة الإسقاطية (FBP)</div>
+        <p class="sci-text">الخوارزمية الكلاسيكية: تُسقَط الأشعة عبر الجسم بزوايا مختلفة وتُجمع رياضياً باستخدام تحويل رادون المعكوس (Radon Transform). كانت تسبب Streak Artifacts بالقرب من العظام.</p>
+      </div>
+      <div class="sci-section">
+        <div class="sci-section-title">🔄 إعادة التكوين التكرارية (Iterative IR)</div>
+        <p class="sci-text">نموذج فيزيائي يقارن القياس الحقيقي بالمحسوب ويكرر التحديث حتى التقارب. يقلل الجرعة الإشعاعية 30–50٪ مع صور أنقى. مستخدم من التسعينات وحتى اليوم.</p>
+      </div>
+      <div class="sci-section">
+        <div class="sci-section-title">🤖 إعادة البناء بالذكاء الاصطناعي (DLR)</div>
+        <p class="sci-text">شبكة عصبية عميقة (U-Net / ResNet) مُدرَّبة على ملايين أزواج صور (جرعة عالية ↔ منخفضة). تفصل الإشارة الحقيقية عن التشويش بشكل يفوق FBP/IR. تقليل الجرعة 85٪.</p>
+      </div>
+      <div class="sci-section">
+        <div class="sci-section-title">📊 مقارنة الخوارزميات</div>
+        <table class="algo-table">
+          <thead><tr><th>الخوارزمية</th><th>SNR</th><th>الجرعة</th><th>السرعة</th></tr></thead>
+          <tbody>
+            <tr><td>FBP (1972)</td><td>12 dB</td><td>20 mSv</td><td>300s</td></tr>
+            <tr><td>Iterative IR</td><td>35 dB</td><td>6.5 mSv</td><td>0.8s</td></tr>
+            <tr><td>DLR / AI</td><td>48 dB</td><td>1.5 mSv</td><td>0.15s</td></tr>
+            <tr><td class="future-row">Photon-Count 2035</td><td class="future-row">65 dB</td><td class="future-row">0.1 mSv</td><td class="future-row">0.02s</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RESEARCH TAB -->
+    <div class="sci-pane" id="paneResearch">
+      <div class="research-card">
+        <span class="research-tag">Nature Medicine · 2024</span>
+        <div class="research-title">Photon-Counting CT: Clinical Translation (Siemens NAEOTOM Alpha)</div>
+        <p class="sci-text">أول نظام تصوير فوتوني وصل للاستخدام السريري الفعلي. يستخدم كواشف Cadmium Telluride (CdTe) تحول الفوتونات إلكترونياً دون وسيط. دقة 0.11 مم وتمييز طاقي K-Edge لفصل الأنسجة.</p>
+        <a class="research-link" href="https://www.nature.com/search?q=photon+counting+CT&subject=radiology" target="_blank" rel="noopener">عرض الأبحاث المنشورة →</a>
+      </div>
+      <div class="research-card">
+        <span class="research-tag">Radiology · 2025</span>
+        <div class="research-title">K-Edge Spectral Nanoparticle Imaging</div>
+        <p class="sci-text">حقن جزيئات النانو بالأوردة لتمييز الأورام السرطانية عبر طيف الطاقة الإشعاعية. يميّز الأنسجة الحميدة من الخبيثة بدون خزعات جراحية.</p>
+        <a class="research-link" href="https://pubs.rsna.org" target="_blank" rel="noopener">RSNA Research Database →</a>
+      </div>
+      <div class="research-card">
+        <span class="research-tag">NEJM · 2025</span>
+        <div class="research-title">Deep Learning CT Denoising: Multi-Center Trial</div>
+        <p class="sci-text">تجربة سريرية متعددة المراكز أثبتت أن خوارزميات DLR تتيح خفض الجرعة 85٪ دون فقدان الدقة التشخيصية مقارنة بالـ FBP الكلاسيكي.</p>
+        <a class="research-link" href="https://pubmed.ncbi.nlm.nih.gov/?term=deep+learning+CT+denoising" target="_blank" rel="noopener">PubMed Database →</a>
+      </div>
+    </div>
+
+    <!-- REPORT TAB -->
+    <div class="sci-pane" id="paneReport">
+      <div class="report-paper">
+        <div class="report-letterhead">
+          <div class="report-hospital">🏥 مستشفى الأبحاث الطبية المتقدمة</div>
+          <div class="report-dept">Department of Radiology & Nuclear Medicine</div>
+        </div>
+        <hr class="report-rule">
+        <div class="report-meta-grid">
+          <div><b>Patient:</b> ANONYMIZED^A</div>
+          <div><b>ID:</b> CT-2026-0001</div>
+          <div><b>DOB:</b> 1972-01-01 · 054Y M</div>
+          <div><b>Study Date:</b> <span id="repDate">2026-09-01</span></div>
+          <div><b>Modality:</b> CT</div>
+          <div><b>Scan:</b> <span id="repScan">Brain CT</span></div>
+          <div><b>Era:</b> <span id="repEra">2024 — AI Multi-Slice</span></div>
+          <div><b>kVp / mAs:</b> 120 kVp / 200 mAs</div>
+        </div>
+        <hr class="report-rule">
+        <div class="report-section">
+          <div class="report-section-title">TECHNIQUE</div>
+          <p id="repTechnique" class="report-text">...</p>
+        </div>
+        <div class="report-section">
+          <div class="report-section-title">FINDINGS</div>
+          <p id="repFindings" class="report-text">...</p>
+        </div>
+        <div class="report-section report-impression">
+          <div class="report-section-title">IMPRESSION</div>
+          <p id="repImpression" class="report-text">...</p>
+        </div>
+        <div class="report-sig">
+          <div class="report-sig-line">_____________________________</div>
+          <div class="report-sig-name">Radiologist Signature & Stamp</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</aside>
+
+<!-- ============================================================
+  DICOM HEADER INSPECTOR MODAL
+  ============================================================ -->
+<div class="modal-backdrop hidden" id="dicomModal">
+  <div class="modal-card modal-wide">
+    <div class="modal-head">
+      <span>🔍 DICOM Data Elements — Header Inspector</span>
+      <button class="modal-close" id="dicomModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="dicom-table-wrap">
+        <table class="dicom-table">
+          <thead><tr><th>Tag</th><th>Name</th><th>VR</th><th>Value</th></tr></thead>
+          <tbody id="dicomTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay for modals -->
+<div class="overlay hidden" id="overlay"></div>
+
+<script src="image_data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
