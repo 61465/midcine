@@ -658,7 +658,7 @@ class CtImageEngine {
     this._startRaf();
   }
 
-  /* ── Load a real image URL ── */
+  /* ── Load a real image URL (with memory cache for medium internet speed) ── */
   loadImage(url, era) {
     this.era = era;
     let effectiveUrl = url;
@@ -667,6 +667,20 @@ class CtImageEngine {
       (url.includes('multiparametric') || (era && era.id === 'future'))
     ) {
       effectiveUrl = MULTIPARAMETRIC_4D_B64;
+    }
+
+    if (!window._IMAGE_CACHE) window._IMAGE_CACHE = {};
+    if (window._IMAGE_CACHE[effectiveUrl]) {
+      const cached = window._IMAGE_CACHE[effectiveUrl];
+      this.sourceImg = cached;
+      this.srcCanvas = document.createElement('canvas');
+      this.srcCanvas.width = cached.naturalWidth || 800;
+      this.srcCanvas.height = cached.naturalHeight || 800;
+      this.srcCtx = this.srcCanvas.getContext('2d', { willReadFrequently: true });
+      this.srcCtx.drawImage(cached, 0, 0);
+      this.resetView();
+      this._dirty = true;
+      return;
     }
 
     const img = new Image();
@@ -681,6 +695,7 @@ class CtImageEngine {
       img.crossOrigin = 'anonymous';
     }
     img.onload = () => {
+      window._IMAGE_CACHE[effectiveUrl] = img;
       this.sourceImg = img;
       // Build offscreen canvas from raw image
       this.srcCanvas = document.createElement('canvas');
