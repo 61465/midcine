@@ -623,15 +623,129 @@ a { color: var(--cyan); }
 }
 
 /* ============================================================
-   RESPONSIVE
+   RESPONSIVE LAYOUT (Laptops, Tablets & Mobile Phones)
    ============================================================ */
-@media (max-width: 900px) {
-  .tb-physics, .telemetry-box { display: none; }
-  .scan-select-wrap select { max-width: 160px; font-size: 11px; }
-  :root { --panel-w: 100vw; }
+
+/* Laptops & medium desktop screens (1366x768 / 1440x900) */
+@media (max-height: 850px) {
+  :root {
+    --topbar-h: 42px;
+    --toolbar-h: 34px;
+    --cine-h: 34px;
+    --era-h: 56px;
+  }
+  .era-btn { padding: 4px 10px; }
+  .era-year { font-size: 10px; }
+  .era-name { font-size: 9px; }
+  .era-tech { display: none; }
 }
-@media (max-width: 600px) {
-  .era-nav { gap: 8px; }
-  .era-btn { min-width: 80px; padding: 4px 10px; }
-  .curtain-handle { width: 30px; height: 30px; font-size: 8px; }
+
+/* Tablets (iPad, Surface, etc.) */
+@media (max-width: 1024px) {
+  .tb-physics { display: none; }
+  .telemetry-box { width: 200px; padding: 6px 8px; }
+  .tel-head { font-size: 9.5px; margin-bottom: 4px; }
+  .tel-label { font-size: 8px; }
+  .tel-val { font-size: 8.5px; }
+  :root { --panel-w: min(440px, 90vw); }
+}
+
+/* Mobile Devices (iPhone, Android, Foldables) */
+@media (max-width: 768px) {
+  :root {
+    --topbar-h: auto;
+    --toolbar-h: 36px;
+    --cine-h: 34px;
+    --era-h: 54px;
+    --panel-w: 100vw;
+  }
+
+  /* Topbar wraps smoothly without overflow */
+  .topbar {
+    padding: 6px 8px;
+    flex-wrap: wrap;
+    height: auto;
+    gap: 6px;
+  }
+  .topbar-left {
+    width: 100%;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .logo-badge { display: none; }
+  .logo-text { font-size: 12px; }
+  .scan-select-wrap { flex: 1; max-width: none; }
+  .scan-select-wrap select { width: 100%; max-width: none; font-size: 10.5px; }
+  
+  .topbar-right {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+  }
+  .topbar-right::-webkit-scrollbar { display: none; }
+  .btn-topbar { padding: 4px 8px; font-size: 10px; flex-shrink: 0; }
+
+  /* Toolbar horizontal swipe */
+  .toolbar {
+    padding: 0 6px;
+    gap: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tb-label { display: none; }
+  .tb-btn { padding: 4px 6px; font-size: 10px; }
+  .preset-btn { padding: 3px 5px; font-size: 9.5px; }
+
+  /* Spectral bar swipe */
+  .spectral-bar {
+    padding: 0 6px;
+    gap: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .spec-sublabel { display: none; }
+  .spec-btn { padding: 2px 6px; font-size: 9.5px; }
+
+  /* Telemetry box compact mobile positioning */
+  .telemetry-box {
+    top: 4px;
+    right: 4px;
+    width: 170px;
+    padding: 4px 6px;
+    background: rgba(10,16,28,.92);
+  }
+  .tel-head { font-size: 8.5px; margin-bottom: 2px; }
+  .tel-bar-wrap { height: 3px; }
+  .tel-row { margin-bottom: 3px; }
+
+  /* HUD mobile adjustments */
+  .hud { padding: 4px 6px; }
+  .hud-line { font-size: 8.5px; line-height: 1.3; }
+
+  /* Era timeline mobile swipe */
+  .era-nav {
+    padding: 0 8px;
+    gap: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .era-label { display: none; }
+  .era-btn {
+    min-width: 76px;
+    padding: 3px 6px;
+  }
+  .era-year { font-size: 10px; }
+  .era-name { font-size: 8.5px; }
+  .era-tech { display: none; }
+  .curtain-handle { width: 32px; height: 32px; font-size: 8px; }
+
+  /* Cine bar */
+  .fps-group { display: none; }
+}
+
+/* Extra small mobile phones (< 420px) */
+@media (max-width: 420px) {
+  .telemetry-box { display: none; }
+  .btn-topbar span { display: none; }
+  .era-btn { min-width: 68px; padding: 2px 4px; }
 }
