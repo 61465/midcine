@@ -88,18 +88,31 @@
 </style>
 </head>
 <body>
-  <div class="demo-banner">
-    ⚠ DEMO / FICTIONAL DATA — All patients, IDs, and clinical text are synthetic.
-    DICOM pixels are anonymized fixtures. No real PHI.
-    &nbsp; · &nbsp; <a href="https://github.com/61465/midcine">Source on GitHub</a>
+  <div class="demo-banner" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 8px 24px;">
+    <div>
+      ⚠ DEMO / FICTIONAL DATA — All patients, IDs, and clinical text are synthetic.
+      DICOM pixels are anonymized fixtures. No real PHI.
+      &nbsp; · &nbsp; <a href="https://github.com/61465/midcine">Source on GitHub</a>
+    </div>
+    <a href="./ct-evolution/" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 6px; background: #0A0E14; color: #06B6D4; padding: 5px 12px; border-radius: 6px; font-weight: 700; text-decoration: none; border: 1px solid #06B6D4; font-size: 11px;">
+      🩻 محاكي الأشعة CT Evolution (1971–2035+) ↗
+    </a>
   </div>
 
   <header class="page">
-    <h1>midcine — live demo</h1>
-    <p class="tagline">
-      Zero-code radiology AI. DICOM in, structured reports out.
-      Pick a case below to open it in the live viewer running on the host.
-    </p>
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <h1 style="margin: 0 0 8px;">midcine — live demo</h1>
+        <p class="tagline" style="margin: 0 0 16px;">
+          Zero-code radiology AI. DICOM in, structured reports out.
+          Pick a case below to open it in the live viewer running on the host.
+        </p>
+      </div>
+      <a href="./ct-evolution/" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%); color: #030712; padding: 12px 20px; font-size: 14px; font-weight: 800; border-radius: 10px; text-decoration: none; box-shadow: 0 0 20px rgba(6, 182, 212, 0.4); margin-bottom: 12px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" rx="2" x="3" y="3"/><circle cx="12" cy="12" r="6"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+        فتح محاكي الأشعة (CT Evolution PACS) ↗
+      </a>
+    </div>
     <div class="stats">
       <div class="stat"><span class="stat-num">17</span><span class="stat-lbl">Demo cases</span></div>
       <div class="stat"><span class="stat-num">MR · CT · X-ray</span><span class="stat-lbl">Modalities</span></div>
