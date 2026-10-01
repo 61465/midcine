@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MEDNEXA — تسجيل الدخول (ديمو)</title>
+<meta name="description" content="MEDNEXA login demo — 4 role-based accounts, fully client-side, no backend required."/>
+<style>
+  :root {
+    --bg:#0A0E14; --card:#131A25; --surface:#19314f; --border:#1F2937;
+    --text:#E5E7EB; --muted:#94A3B8;
+    --accent:#06B6D4; --accent-2:#67E8F9;
+    --admin:#A855F7; --rad:#06B6D4; --doc:#10B981; --pat:#F59E0B;
+    --ok:#10B981; --err:#F87171;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","SF Arabic","Noto Kufi Arabic",Tahoma,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.6}
+  .demo-banner{position:sticky;top:0;z-index:100;background:#F59E0B;color:#0A0E14;
+    padding:8px 24px;font-size:12px;font-weight:600;text-align:center}
+  .demo-banner a{color:#0A0E14;text-decoration:underline;font-weight:800}
+  .wrap{max-width:1100px;margin:0 auto;padding:32px 20px}
+  @media(max-width:860px){.wrap{padding:20px}}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px}
+  .form-panel h1{font-size:22px;margin-bottom:4px}
+  .form-panel .sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+  .role-switch{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:20px;
+               background:#0A0E14;border:1px solid var(--border);padding:4px;border-radius:12px}
+  .role-switch button{background:transparent;color:var(--muted);border:0;padding:10px 4px;border-radius:8px;
+                      font-size:12px;cursor:pointer;transition:all .15s;font-weight:600;font-family:inherit}
+  .role-switch button .emoji{font-size:20px;display:block;margin-bottom:3px}
+  .role-switch button.active{color:#fff}
+  .role-switch button[data-role="admin"].active{background:var(--admin);color:#fff}
+  .role-switch button[data-role="radiologist"].active{background:var(--rad);color:#001E24}
+  .role-switch button[data-role="doctor"].active{background:var(--doc);color:#002018}
+  .role-switch button[data-role="patient"].active{background:var(--pat);color:#1A0F00}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600}
+  .field input{width:100%;padding:12px 14px;background:#0A0E14;border:1px solid var(--border);border-radius:10px;
+               color:var(--text);font-size:14px;font-family:ui-monospace,Consolas,monospace;transition:border .15s}
+  .field input:focus{outline:none;border-color:var(--accent)}
+  .submit{width:100%;padding:14px;background:var(--accent);color:#001E24;border:0;border-radius:10px;
+          font-weight:800;font-size:15px;cursor:pointer;transition:all .15s;margin-top:6px;font-family:inherit}
+  .submit:hover{background:var(--accent-2)}
+  .submit:disabled{opacity:.6;cursor:wait}
+  .alert{padding:12px 14px;border-radius:8px;margin-top:12px;font-size:13px;display:none}
+  .alert.show{display:block}
+  .alert.err{color:#FCA5A5;background:#4A1515;border:1px solid #7B2D2D}
+  .alert.ok{color:#A7F3D0;background:#064E3B;border:1px solid #047857}
+  .info-panel .brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .info-panel .brand .mark{width:42px;height:42px;border-radius:10px;
+                           background:linear-gradient(135deg,#06B6D4,#A855F7);
+                           display:grid;place-items:center;font-weight:900;font-size:19px;color:#fff}
+  .info-panel .brand .name{font-size:19px;font-weight:800}
+  .info-panel .brand .tag{font-size:11px;color:var(--muted)}
+  .role-info h2{font-size:17px;margin-bottom:4px}
+  .role-info .person{color:var(--muted);font-size:12px;margin-bottom:16px}
+  .section-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin:16px 0 8px;font-weight:700}
+  .inside-list{list-style:none;padding:0}
+  .inside-list li{padding:5px 0;font-size:13.5px;color:var(--text)}
+  .inside-list li::before{content:"\25C6  ";color:var(--accent);margin-inline-end:4px}
+  .integration{background:#052E2E;border:1px solid #047857;border-radius:10px;padding:12px 14px;
+               margin-top:12px;font-size:12.5px;color:#A7F3D0;line-height:1.6}
+  .integration b{color:#6EE7B7}
+  .scenario{background:#0A0E14;border:1px solid var(--border);border-radius:10px;padding:12px 14px;
+            margin-top:14px;font-size:12.5px;color:var(--muted);line-height:1.75}
+  .scenario b{color:var(--accent-2)}
+  footer{margin-top:36px;text-align:center;color:var(--muted);font-size:12px}
+  footer a{color:var(--accent)}
+  .dashboard{display:none}
+  .dashboard.show{display:block}
+  .dash-header{display:flex;align-items:center;justify-content:space-between;
+               padding:16px 20px;background:var(--card);border:1px solid var(--border);
+               border-radius:12px;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+  .dash-header .who{display:flex;align-items:center;gap:10px}
+  .dash-header .avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+                       font-weight:800;color:#fff;font-size:16px}
+  .dash-header .meta{font-size:13px}
+  .dash-header .meta b{color:var(--text)}
+  .dash-header .meta .role{font-size:11px;color:var(--muted)}
+  .dash-header .logout{padding:8px 14px;background:#0A0E14;color:var(--muted);
+                       border:1px solid var(--border);border-radius:8px;cursor:pointer;
+                       font-size:12px;font-family:inherit}
+  .dash-header .logout:hover{color:var(--text);border-color:var(--accent)}
+  .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+  .stat .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700}
+  .stat .num{font-size:28px;font-weight:800;color:var(--accent);margin-bottom:4px}
+  .stat .delta{font-size:12px;color:var(--ok)}
+  .stat .delta.warn{color:var(--pat)}
+  .section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px}
+  .section h3{font-size:14px;margin-bottom:12px}
+  .section table{width:100%;border-collapse:collapse;font-size:13px}
+  .section th,.section td{padding:10px 8px;text-align:start;border-bottom:1px solid var(--border)}
+  .section th{color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
+  .section tr:last-child td{border-bottom:none}
+  .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700}
+  .badge.ok{background:#064E3B;color:#A7F3D0}
+  .badge.warn{background:#78350F;color:#FDE68A}
+  .badge.info{background:#164E63;color:#A5F3FC}
+</style>
+</head>
+<body>
+<div class="demo-banner">
+  🧪 ديمو MEDNEXA / midcine — تجربة واجهة فقط · لا backend حقيقي ·
+  <a href="./index.html">↩ العودة لمعرض الدراسات</a>
+</div>
+<div class="wrap">
+  <div class="grid" id="loginView">
+    <div class="panel form-panel" id="formPanel">
+      <h1>تسجيل الدخول</h1>
+      <p class="sub">اختر الدور ثم اضغط دخول — بيانات تجريبية مُعبّأة مسبقاً</p>
+      <div class="role-switch">
+        <button type="button" data-role="admin" class="active"><span class="emoji">👑</span>Admin</button>
+        <button type="button" data-role="radiologist"><span class="emoji">🩻</span>Radiologist</button>
+        <button type="button" data-role="doctor"><span class="emoji">👨‍⚕️</span>Doctor</button>
+        <button type="button" data-role="patient"><span class="emoji">👤</span>Patient</button>
+      </div>
+      <form id="loginForm" autocomplete="off">
+        <div class="field">
+          <label>البريد الإلكتروني</label>
+          <input id="email" type="email" required>
+        </div>
+        <div class="field">
+          <label>كلمة المرور</label>
+          <input id="password" type="text" required>
+        </div>
+        <button class="submit" id="submitBtn" type="submit">دخول ←</button>
+        <div id="err" class="alert err"></div>
+        <div id="ok" class="alert ok"></div>
+      </form>
+    </div>
+    <div class="panel info-panel" id="infoPanel">
+      <div class="brand">
+        <div class="mark">M</div>
+        <div>
+          <div class="name">MEDNEXA</div>
+          <div class="tag">نظام إدارة الأشعة المتكامل · HL7 · FHIR · DICOM</div>
+        </div>
+      </div>
+      <div class="role-info" id="roleInfo"></div>
+      <div class="scenario">
+        <div class="section-title" style="margin-top:0">🎬 السيناريو الكامل (3 دقائق)</div>
+        <div><b>1.</b> Admin → شاهد لوحة الإدارة وسجل التدقيق (hash-chained).</div>
+        <div><b>2.</b> Radiologist → اقرأ التقرير النهائي لـ CT Chest.</div>
+        <div><b>3.</b> Doctor → لاحظ ACL صارم (يرى PAT-001 فقط).</div>
+        <div><b>4.</b> Patient → اسحب consent → Doctor يفقد الوصول فوراً.</div>
+      </div>
+    </div>
+  </div>
+  <div class="dashboard" id="dashboardView"></div>
+  <footer style="margin-top:40px">
+    MEDNEXA · <a href="./index.html">معرض الدراسات</a> ·
+    <a href="https://github.com/61465/midcine">Source</a> ·
+    جميع البيانات اصطناعية — ديمو تفاعلي بدون backend
+  </footer>
+</div>
+<script>
+const ACCOUNTS = {
+  admin: {
+    name: "Admin — المسؤول",
+    person: "Dr. Sara Al-Hamdi · صلاحية كاملة",
+    email: "admin@mednexa.co",
+    password: "AdminDemo2026!",
+    color: "#A855F7",
+    inside: [
+      "قائمة المرضى الكاملة + البحث",
+      "Studies قادمة من DICOM SCP + Modality Worklist",
+      "سجل التدقيق مع hash chain لكل عملية",
+      "إدارة المستخدمين + استقبال HL7",
+      "DPIA + سجل خروقات PDPC"
+    ],
+    integration: "🔗 <b>التكامل:</b> يوقّع تقارير Radiologist قبل أن يراها Doctor و Patient.",
+    stats: [
+      {label:"المرضى النشطون", num:"1,247", delta:"+12 هذا الأسبوع"},
+      {label:"Studies اليوم", num:"89", delta:"+8% عن الأمس"},
+      {label:"تقارير معلّقة للتوقيع", num:"7", delta:"يحتاج انتباه", warn:true},
+      {label:"سجل التدقيق", num:"23,841", delta:"✓ سلسلة سليمة"}
+    ],
+    table: {
+      title: "آخر المرضى + Studies",
+      cols: ["MRN","الاسم","آخر دراسة","الحالة"],
+      rows: [
+        ["PAT-001","Mohammed Al-Sayed","CT Chest · اليوم 10:30",'<span class="badge ok">تقرير نهائي</span>'],
+        ["PAT-002","Fatima Al-Zahra","MR Brain · أمس 14:15",'<span class="badge warn">معلّق</span>'],
+        ["PAT-003","Ahmed Al-Rashid","XR Hand · 2026-09-30",'<span class="badge ok">تقرير نهائي</span>'],
+        ["PAT-004","Nora Al-Qahtani","CT Abdomen · 2026-09-29",'<span class="badge info">قيد المراجعة</span>']
+      ]
+    }
+  },
+  radiologist: {
+    name: "Radiologist — أخصائي أشعة",
+    person: "Dr. Omar Al-Mansoori",
+    email: "radiologist@mednexa.co",
+    password: "RadDemo2026!",
+    color: "#06B6D4",
+    inside: [
+      "PACS Viewer يفتح CT Chest تجريبي",
+      "محرر التقارير مع 3 قوالب جاهزة",
+      "state-machine: draft → signed → finalized → amended",
+      "تعقيم bleach للـHTML",
+      "تصدير PDF"
+    ],
+    integration: "🔗 <b>التكامل:</b> التقرير المنتهي يظهر فوراً عند Admin للتوقيع وعند Patient بعد finalize.",
+    stats: [
+      {label:"تقارير اليوم", num:"14", delta:"+3 عن الأمس"},
+      {label:"قيد الكتابة", num:"3", delta:"draft"},
+      {label:"بانتظار التوقيع", num:"5", delta:"→ Admin"},
+      {label:"أُنهيت هذا الأسبوع", num:"67", delta:"✓"}
+    ],
+    table: {
+      title: "طابور الـStudies",
+      cols: ["Study UID","المريض","Modality","الأولوية"],
+      rows: [
+        ["1.2.826.0...9009","PAT-001","CT",'<span class="badge warn">عاجل</span>'],
+        ["1.2.826.0...9010","PAT-012","MR",'<span class="badge info">عادي</span>'],
+        ["1.2.826.0...9011","PAT-023","XR",'<span class="badge info">عادي</span>'],
+        ["1.2.826.0...9012","PAT-005","US",'<span class="badge info">عادي</span>']
+      ]
+    }
+  },
+  doctor: {
+    name: "Doctor — طبيب محيل",
+    person: "Dr. Khalid Al-Nassar · باطنية",
+    email: "doctor@mednexa.co",
+    password: "DocDemo2026!",
+    color: "#10B981",
+    inside: [
+      "المرضى المسموح له برؤيتهم فقط (ACL صارم)",
+      "تقارير PAT-001 (نهائية فقط)",
+      "طلب إحالة لأشعة جديدة",
+      "تاريخ طلبات الإحالة"
+    ],
+    integration: "🔗 <b>التكامل:</b> لا يرى شيئاً حتى يمنحه Admin الوصول <u>و</u> يوافق Patient على consent.",
+    stats: [
+      {label:"مرضاي (ACL)", num:"1", delta:"PAT-001 فقط"},
+      {label:"إحالات مفتوحة", num:"2", delta:"في الانتظار"},
+      {label:"نتائج جديدة", num:"1", delta:"CT Chest · اليوم"},
+      {label:"موافقات نشطة", num:"1", delta:"✓ من Patient"}
+    ],
+    table: {
+      title: "مرضاي",
+      cols: ["MRN","الاسم","آخر تقرير","Consent"],
+      rows: [
+        ["PAT-001","Mohammed Al-Sayed","CT Chest · اليوم",'<span class="badge ok">نشط</span>']
+      ]
+    }
+  },
+  patient: {
+    name: "Patient — المريض",
+    person: "Mohammed Al-Sayed · MRN PAT-001",
+    email: "patient@mednexa.co",
+    password: "PatDemo2026!",
+    color: "#F59E0B",
+    inside: [
+      "دراساته DICOM فقط (CT Chest)",
+      "تقاريره <b>النهائية</b> فقط — لا draft",
+      "نتائج المختبر (CBC + Glucose)",
+      "منح/سحب consent لأطباء محدّدين"
+    ],
+    integration: "🔗 <b>التكامل:</b> حين يسحب consent يختفي PAT-001 فوراً من قائمة Doctor — موثّق في سجل Admin.",
+    stats: [
+      {label:"دراساتي", num:"1", delta:"CT Chest · اليوم"},
+      {label:"تقاريري النهائية", num:"1", delta:"جاهز للعرض"},
+      {label:"نتائج مختبر", num:"4", delta:"CBC + Glucose"},
+      {label:"الموافقات النشطة", num:"1", delta:"Dr. Khalid"}
+    ],
+    table: {
+      title: "موافقاتي (Consents)",
+      cols: ["الطبيب","التخصّص","مدى الوصول","الإجراء"],
+      rows: [
+        ["Dr. Khalid Al-Nassar","باطنية","full",'<span class="badge ok">نشط</span>']
+      ]
+    }
+  }
+};
+let currentRole = "admin";
+function renderInfo(role) {
+  const a = ACCOUNTS[role];
+  document.getElementById("roleInfo").innerHTML =
+    '<h2>' + a.name + '</h2>' +
+    '<div class="person">' + a.person + '</div>' +
+    '<div class="section-title">ما ستراه في الداخل</div>' +
+    '<ul class="inside-list">' +
+      a.inside.map(function(x){return '<li>' + x + '</li>';}).join("") +
+    '</ul>' +
+    '<div class="integration">' + a.integration + '</div>';
+}
+function selectRole(role) {
+  currentRole = role;
+  const a = ACCOUNTS[role];
+  document.getElementById("email").value = a.email;
+  document.getElementById("password").value = a.password;
+  document.querySelectorAll(".role-switch button").forEach(function(b){
+    b.classList.toggle("active", b.dataset.role === role);
+  });
+  renderInfo(role);
+}
+document.querySelectorAll(".role-switch button").forEach(function(b){
+  b.addEventListener("click", function(){ selectRole(b.dataset.role); });
+});
+function renderDashboard(role) {
+  const a = ACCOUNTS[role];
+  const parts = a.person.split(" ");
+  const initial = (parts[1] && parts[1][0]) || a.name[0];
+  const statsHtml = a.stats.map(function(s){
+    return '<div class="stat">' +
+      '<div class="label">' + s.label + '</div>' +
+      '<div class="num">' + s.num + '</div>' +
+      '<div class="delta ' + (s.warn ? 'warn' : '') + '">' + s.delta + '</div>' +
+    '</div>';
+  }).join("");
+  const rowsHtml = a.table.rows.map(function(r){
+    return '<tr>' + r.map(function(c){return '<td>' + c + '</td>';}).join("") + '</tr>';
+  }).join("");
+  const colsHtml = a.table.cols.map(function(c){return '<th>' + c + '</th>';}).join("");
+  const html =
+    '<div class="dash-header">' +
+      '<div class="who">' +
+        '<div class="avatar" style="background:' + a.color + '">' + initial + '</div>' +
+        '<div class="meta">' +
+          '<b>' + a.person.split(" · ")[0] + '</b>' +
+          '<div class="role">' + a.name + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<button class="logout" onclick="logout()">تسجيل خروج ↪</button>' +
+    '</div>' +
+    '<div class="dash-grid">' + statsHtml + '</div>' +
+    '<div class="section">' +
+      '<h3>' + a.table.title + '</h3>' +
+      '<table><thead><tr>' + colsHtml + '</tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
+    '</div>' +
+    '<div class="section" style="font-size:12.5px;color:var(--muted);line-height:1.8">' +
+      '<div class="section-title" style="margin-top:0">عن هذا الديمو</div>' +
+      'هذه نسخة <b style="color:var(--accent-2)">عرض واجهة فقط (UI preview)</b>. ' +
+      'النظام الكامل يعمل على backend حقيقي (FastAPI + DICOM SCP + nginx) وبوابة cloudflare. ' +
+      a.integration + '<br/><br/>' +
+      'جرّب الأدوار الأخرى بالضغط على "تسجيل خروج" ثم اختيار دور آخر لترى <b>تكامل البيانات</b> بين الحسابات (نفس المريض PAT-001).' +
+    '</div>';
+  const d = document.getElementById("dashboardView");
+  d.innerHTML = html;
+  d.classList.add("show");
+  document.getElementById("loginView").style.display = "none";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function logout() {
+  document.getElementById("dashboardView").classList.remove("show");
+  document.getElementById("loginView").style.display = "grid";
+  document.getElementById("ok").classList.remove("show");
+  document.getElementById("err").classList.remove("show");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.getElementById("loginForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const errBox = document.getElementById("err");
+  const okBox = document.getElementById("ok");
+  errBox.classList.remove("show");
+  okBox.classList.remove("show");
+  const match = Object.entries(ACCOUNTS).find(function(pair){
+    return pair[1].email === email && pair[1].password === password;
+  });
+  if (!match) {
+    errBox.textContent = "❌ البريد أو كلمة المرور غير صحيحة. استخدم أحد الحسابات المُعبّأة أعلاه.";
+    errBox.classList.add("show");
+    return;
+  }
+  const role = match[0];
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "جاري الدخول…";
+  okBox.textContent = "✓ تم تسجيل الدخول — جاري عرض اللوحة…";
+  okBox.classList.add("show");
+  setTimeout(function(){
+    btn.disabled = false;
+    btn.textContent = "دخول ←";
+    renderDashboard(role);
+  }, 450);
+});
+selectRole("admin");
+</script>
+</body>
+</html>
