@@ -1,0 +1,24 @@
+{
+  "version": "1.0.1",
+  "released": "2026-11-18",
+  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.1/NexusZone-Setup-1.0.1.exe",
+  "landingUrl": "https://61465.github.io/midcine/nexus-zone/",
+  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.1",
+  "sha256": "44844718E05B74AFD8EA667FF5204719C8FFDC1F7C497ADE67CE65F9DF10B4B9",
+  "size": 123240712,
+  "critical": false,
+  "changelog": {
+    "ar": [
+      "قالب الباطنة والصدر - Internal Medicine مع جميع حقول الفحوص الحيوية",
+      "إصلاح مشكلة الحفظ: الآن تُحفظ كل الحقول (التاريخ المرضي، الحرارة، الضغط، السكر، SpO2، النبض، التحاليل، الأشعة، التغذية)",
+      "مركز الحسابات في شاشة تسجيل الدخول: إنشاء حساب جديد + اختيار حساب",
+      "ترقية تلقائية لقاعدة البيانات مع الحفاظ على بياناتك القديمة"
+    ],
+    "en": [
+      "New Internal Medicine prescription template with full vital-signs fields",
+      "Save fix: all clinical fields persist (past history, vitals, labs, imaging, nutrition)",
+      "Account Center on login screen: create new account and switch accounts",
+      "Automatic DB migration preserving existing data"
+    ]
+  }
+}
