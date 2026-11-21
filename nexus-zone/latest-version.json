@@ -1,26 +1,28 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.4",
   "released": "2026-11-21",
-  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.2/NexusZone-Setup-1.0.2.exe",
+  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.4/NexusZone-Setup-1.0.4.exe",
   "landingUrl": "https://61465.github.io/midcine/nexus-zone/",
-  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.2",
-  "sha256": "F1142CF3655B811D848D857E4F9095299320EA4FA74A580F3034E6E22ED5F83E",
-  "size": 106926266,
+  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.4",
+  "sha256": "81D8873959F10A6B9A97FB079D9226444F0AB17C486A46AC46E409577A27CE4C",
+  "size": 106927261,
   "critical": false,
   "changelog": {
     "ar": [
-      "إصلاح حفظ ملف العيادة: 20 حقل تُحفظ بالكامل (كانت 10 فقط). البريد، الموقع، المدينة، المحافظة، الدولة، طريقة الحجز، ساعات العمل — كلها تُحفظ الآن.",
-      "تسجيلات تشخيصية لحفظ شعار العيادة والتوقيع والختم.",
-      "التحقق من حفظ قوالب الوصفات: رسالة خطأ صريحة بدلاً من فشل صامت.",
-      "إنشاء حساب جديد من شاشة الدخول — نموذج كامل باسم المستخدم، كلمة المرور، نوع الحساب، واعتماد المدير.",
-      "تحديث Electron إلى الإصدار 38 لأداء أفضل وأمان أعلى."
+      "جديد: زر 'نسيت كلمة المرور؟ استعادة حسابي' بضغطة واحدة — يحذف الحساب القديم ويعيد البرنامج لإعداد حساب جديد مع الحفاظ على بيانات المرضى.",
+      "إصلاح حفظ ملف العيادة: 20 حقل تُحفظ كاملة (كانت 10).",
+      "إنشاء حساب جديد من شاشة الدخول — نموذج كامل.",
+      "تسجيلات تشخيصية لحفظ الشعار والتوقيع والختم.",
+      "التحقق من بيانات قوالب الوصفات.",
+      "تحديث Electron إلى الإصدار 38."
     ],
     "en": [
-      "Clinic profile save fix: all 20 fields now persist (was 10).",
-      "Diagnostic logging for logo/signature/stamp save paths.",
-      "Prescription template save validation.",
-      "Create Account modal on login replaces instructional banner.",
-      "Electron 33 → 38 upgrade for better performance and security."
+      "New: 'Forgot password? Recover my account' one-click button — wipes old account and restarts into setup wizard while preserving patient data.",
+      "Clinic profile save fix: all 20 fields persist.",
+      "Full create-account modal on login.",
+      "Diagnostic logging for logo/signature/stamp.",
+      "Prescription template validation.",
+      "Electron 33 → 38 upgrade."
     ]
   }
 }
