@@ -1,22 +1,22 @@
 {
-  "version": "1.0.6",
+  "version": "1.0.7",
   "released": "2026-11-21",
-  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.6/NexusZone-Setup-1.0.6.exe",
+  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.7/NexusZone-Setup-1.0.7.exe",
   "landingUrl": "https://61465.github.io/midcine/nexus-zone/",
-  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.6",
-  "sha256": "7953BE8F58F0CD12B502FE308B75321BB95E55834B6F90410BEF613AC922974C",
-  "size": 106926613,
+  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.7",
+  "sha256": "A7C4CDCD55D7D37977896FD72B1F9CB846DEE8B45D464741B15FD7CA2CEF208D",
+  "size": 106927059,
   "critical": false,
   "changelog": {
     "ar": [
-      "إصلاح نقرات اختيار قالب الباطنة لتصل إلى معالج Angular الصحيح.",
-      "إيقاف حذف الحسابات تلقائيًا عند الترقية؛ تبقى حسابات المستخدمين كما هي، وتظل الاستعادة اليدوية متاحة.",
-      "بيانات المرضى والوصفات لا تتغير أثناء التحديث."
+      "إصلاح تكرار رقم الوصفة بعد حذف وصفات: يُولّد الرقم بعد أعلى رقم محفوظ.",
+      "عند إدخال رقم مستخدم، تظهر رسالة واضحة بدل خطأ قاعدة البيانات.",
+      "يشمل إصلاحات 1.0.6: اختيار قالب الباطنة يعمل والحسابات لا تُحذف تلقائيًا عند الترقية."
     ],
     "en": [
-      "Fixed Internal Medicine template clicks so Angular handles template selection.",
-      "Removed automatic account deletion during upgrades; user accounts are preserved and manual recovery remains available.",
-      "Patient and prescription data remain unchanged during updates."
+      "Fixed duplicate prescription numbers after deletions by generating the next number after the highest stored value.",
+      "Manual duplicate numbers now show a clear message instead of a raw database error.",
+      "Includes 1.0.6 fixes: Internal Medicine template selection works and upgrades no longer delete accounts automatically."
     ]
   }
 }
