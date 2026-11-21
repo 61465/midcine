@@ -1,24 +1,26 @@
 {
-  "version": "1.0.1",
-  "released": "2026-11-18",
-  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.1/NexusZone-Setup-1.0.1.exe",
+  "version": "1.0.2",
+  "released": "2026-11-21",
+  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.2/NexusZone-Setup-1.0.2.exe",
   "landingUrl": "https://61465.github.io/midcine/nexus-zone/",
-  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.1",
-  "sha256": "44844718E05B74AFD8EA667FF5204719C8FFDC1F7C497ADE67CE65F9DF10B4B9",
-  "size": 123240712,
+  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.2",
+  "sha256": "F1142CF3655B811D848D857E4F9095299320EA4FA74A580F3034E6E22ED5F83E",
+  "size": 106926266,
   "critical": false,
   "changelog": {
     "ar": [
-      "قالب الباطنة والصدر - Internal Medicine مع جميع حقول الفحوص الحيوية",
-      "إصلاح مشكلة الحفظ: الآن تُحفظ كل الحقول (التاريخ المرضي، الحرارة، الضغط، السكر، SpO2، النبض، التحاليل، الأشعة، التغذية)",
-      "مركز الحسابات في شاشة تسجيل الدخول: إنشاء حساب جديد + اختيار حساب",
-      "ترقية تلقائية لقاعدة البيانات مع الحفاظ على بياناتك القديمة"
+      "إصلاح حفظ ملف العيادة: 20 حقل تُحفظ بالكامل (كانت 10 فقط). البريد، الموقع، المدينة، المحافظة، الدولة، طريقة الحجز، ساعات العمل — كلها تُحفظ الآن.",
+      "تسجيلات تشخيصية لحفظ شعار العيادة والتوقيع والختم.",
+      "التحقق من حفظ قوالب الوصفات: رسالة خطأ صريحة بدلاً من فشل صامت.",
+      "إنشاء حساب جديد من شاشة الدخول — نموذج كامل باسم المستخدم، كلمة المرور، نوع الحساب، واعتماد المدير.",
+      "تحديث Electron إلى الإصدار 38 لأداء أفضل وأمان أعلى."
     ],
     "en": [
-      "New Internal Medicine prescription template with full vital-signs fields",
-      "Save fix: all clinical fields persist (past history, vitals, labs, imaging, nutrition)",
-      "Account Center on login screen: create new account and switch accounts",
-      "Automatic DB migration preserving existing data"
+      "Clinic profile save fix: all 20 fields now persist (was 10).",
+      "Diagnostic logging for logo/signature/stamp save paths.",
+      "Prescription template save validation.",
+      "Create Account modal on login replaces instructional banner.",
+      "Electron 33 → 38 upgrade for better performance and security."
     ]
   }
 }
