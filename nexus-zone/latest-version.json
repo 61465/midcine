@@ -1,28 +1,22 @@
 {
-  "version": "1.0.4",
+  "version": "1.0.6",
   "released": "2026-11-21",
-  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.4/NexusZone-Setup-1.0.4.exe",
+  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.6/NexusZone-Setup-1.0.6.exe",
   "landingUrl": "https://61465.github.io/midcine/nexus-zone/",
-  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.4",
-  "sha256": "81D8873959F10A6B9A97FB079D9226444F0AB17C486A46AC46E409577A27CE4C",
-  "size": 106927261,
+  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.6",
+  "sha256": "7953BE8F58F0CD12B502FE308B75321BB95E55834B6F90410BEF613AC922974C",
+  "size": 106926613,
   "critical": false,
   "changelog": {
     "ar": [
-      "جديد: زر 'نسيت كلمة المرور؟ استعادة حسابي' بضغطة واحدة — يحذف الحساب القديم ويعيد البرنامج لإعداد حساب جديد مع الحفاظ على بيانات المرضى.",
-      "إصلاح حفظ ملف العيادة: 20 حقل تُحفظ كاملة (كانت 10).",
-      "إنشاء حساب جديد من شاشة الدخول — نموذج كامل.",
-      "تسجيلات تشخيصية لحفظ الشعار والتوقيع والختم.",
-      "التحقق من بيانات قوالب الوصفات.",
-      "تحديث Electron إلى الإصدار 38."
+      "إصلاح نقرات اختيار قالب الباطنة لتصل إلى معالج Angular الصحيح.",
+      "إيقاف حذف الحسابات تلقائيًا عند الترقية؛ تبقى حسابات المستخدمين كما هي، وتظل الاستعادة اليدوية متاحة.",
+      "بيانات المرضى والوصفات لا تتغير أثناء التحديث."
     ],
     "en": [
-      "New: 'Forgot password? Recover my account' one-click button — wipes old account and restarts into setup wizard while preserving patient data.",
-      "Clinic profile save fix: all 20 fields persist.",
-      "Full create-account modal on login.",
-      "Diagnostic logging for logo/signature/stamp.",
-      "Prescription template validation.",
-      "Electron 33 → 38 upgrade."
+      "Fixed Internal Medicine template clicks so Angular handles template selection.",
+      "Removed automatic account deletion during upgrades; user accounts are preserved and manual recovery remains available.",
+      "Patient and prescription data remain unchanged during updates."
     ]
   }
 }
