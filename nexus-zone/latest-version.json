@@ -1,22 +1,22 @@
 {
-  "version": "1.0.8",
+  "version": "1.0.9",
   "released": "2026-11-24",
-  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.8/NexusZone-Setup-1.0.8.exe",
+  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.9/NexusZone-Setup-1.0.9.exe",
   "landingUrl": "https://61465.github.io/midcine/nexus-zone/",
-  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.8",
-  "sha256": "F63D893FCC7259513E1C8469E9206FD0B6506AEB6A254281CAF12C63B197883D",
-  "size": 106927475,
+  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.9",
+  "sha256": "EFBB2EDBB8BC02B76754D4662FA1EA1DB56125FF269E20F5B0554982185C1239",
+  "size": 106987626,
   "critical": false,
   "changelog": {
     "ar": [
-      "إصلاح حفظ شعار العيادة والتوقيع وبيانات الطبيب وعنوان وتذييل الروشتة، مع تحميلها تلقائيًا عند فتح البرنامج مجددًا.",
-      "إظهار نجاح الحفظ بعد تأكيد قاعدة البيانات فقط، وعرض الخطأ عند فشل التخزين.",
-      "يشمل إصلاح تكرار أرقام الوصفات والحفاظ على الحسابات وبيانات المستخدمين عند الترقية."
+      "إضافة نموذج الكشف الطبي المتجهي إلى البرنامج بزر «نموذج الكشف» في الشريط العلوي. النموذج الأصلي يفتح في نافذة مستقلة، ويدعم الكتابة والطباعة والحفظ PDF.",
+      "إصلاح حفظ واستعادة شعار العيادة والتوقيع وبيانات الطبيب وعنوان وتذييل الروشتة.",
+      "يتضمن إصلاح أرقام الوصفات والحفاظ على الحسابات والبيانات عند الترقية."
     ],
     "en": [
-      "Fixed persistence and reload of clinic logo, signature, physician details, and prescription header and footer.",
-      "Show save success only after the database confirms the write; report failures clearly.",
-      "Includes duplicate prescription number and account preservation fixes."
+      "Added the supplied vector medical form to the app with a top-bar button. It opens in a dedicated window and supports editing, printing, and saving to PDF.",
+      "Fixed persistence and reload of the clinic logo, signature, physician details, and prescription header/footer.",
+      "Includes prescription number and upgrade data preservation fixes."
     ]
   }
 }
