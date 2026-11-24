@@ -1,22 +1,22 @@
 {
-  "version": "1.0.7",
-  "released": "2026-11-21",
-  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.7/NexusZone-Setup-1.0.7.exe",
+  "version": "1.0.8",
+  "released": "2026-11-24",
+  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.8/NexusZone-Setup-1.0.8.exe",
   "landingUrl": "https://61465.github.io/midcine/nexus-zone/",
-  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.7",
-  "sha256": "A7C4CDCD55D7D37977896FD72B1F9CB846DEE8B45D464741B15FD7CA2CEF208D",
-  "size": 106927059,
+  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.8",
+  "sha256": "F63D893FCC7259513E1C8469E9206FD0B6506AEB6A254281CAF12C63B197883D",
+  "size": 106927475,
   "critical": false,
   "changelog": {
     "ar": [
-      "إصلاح تكرار رقم الوصفة بعد حذف وصفات: يُولّد الرقم بعد أعلى رقم محفوظ.",
-      "عند إدخال رقم مستخدم، تظهر رسالة واضحة بدل خطأ قاعدة البيانات.",
-      "يشمل إصلاحات 1.0.6: اختيار قالب الباطنة يعمل والحسابات لا تُحذف تلقائيًا عند الترقية."
+      "إصلاح حفظ شعار العيادة والتوقيع وبيانات الطبيب وعنوان وتذييل الروشتة، مع تحميلها تلقائيًا عند فتح البرنامج مجددًا.",
+      "إظهار نجاح الحفظ بعد تأكيد قاعدة البيانات فقط، وعرض الخطأ عند فشل التخزين.",
+      "يشمل إصلاح تكرار أرقام الوصفات والحفاظ على الحسابات وبيانات المستخدمين عند الترقية."
     ],
     "en": [
-      "Fixed duplicate prescription numbers after deletions by generating the next number after the highest stored value.",
-      "Manual duplicate numbers now show a clear message instead of a raw database error.",
-      "Includes 1.0.6 fixes: Internal Medicine template selection works and upgrades no longer delete accounts automatically."
+      "Fixed persistence and reload of clinic logo, signature, physician details, and prescription header and footer.",
+      "Show save success only after the database confirms the write; report failures clearly.",
+      "Includes duplicate prescription number and account preservation fixes."
     ]
   }
 }
