@@ -1,22 +1,22 @@
 {
-  "version": "1.0.9",
+  "version": "1.0.10",
   "released": "2026-11-24",
-  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.9/NexusZone-Setup-1.0.9.exe",
+  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.10/NexusZone-Setup-1.0.10.exe",
   "landingUrl": "https://61465.github.io/midcine/nexus-zone/",
-  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.9",
-  "sha256": "EFBB2EDBB8BC02B76754D4662FA1EA1DB56125FF269E20F5B0554982185C1239",
-  "size": 106987626,
+  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.10",
+  "sha256": "02E0225C6D0A8383513A42C513BD0F525005CBD6FC475E5E69F9289F7072D91B",
+  "size": 106988114,
   "critical": false,
   "changelog": {
     "ar": [
-      "إضافة نموذج الكشف الطبي المتجهي إلى البرنامج بزر «نموذج الكشف» في الشريط العلوي. النموذج الأصلي يفتح في نافذة مستقلة، ويدعم الكتابة والطباعة والحفظ PDF.",
-      "إصلاح حفظ واستعادة شعار العيادة والتوقيع وبيانات الطبيب وعنوان وتذييل الروشتة.",
-      "يتضمن إصلاح أرقام الوصفات والحفاظ على الحسابات والبيانات عند الترقية."
+      "إضافة «نموذج الكشف الطبي المتجهي (A4)» إلى معرض القوالب بجانب القوالب الحالية، ويبقى متاحًا بعد إعادة التشغيل.",
+      "إصلاح استعادة الحساب: أزرار preload تستدعي IPC عبر الجسر المسموح من السياق الصحيح، مع استمرار منع القنوات غير المصرح بها.",
+      "النموذج الأصلي المرفق يظل متاحًا من زر «نموذج الكشف» لفتحه والكتابة والطباعة أو الحفظ PDF."
     ],
     "en": [
-      "Added the supplied vector medical form to the app with a top-bar button. It opens in a dedicated window and supports editing, printing, and saving to PDF.",
-      "Fixed persistence and reload of the clinic logo, signature, physician details, and prescription header/footer.",
-      "Includes prescription number and upgrade data preservation fixes."
+      "Added “Vector Medical Examination Form (A4)” to the template gallery; it remains available after restart.",
+      "Fixed account recovery: preload actions now invoke IPC from the correct isolated context while preserving the channel allowlist.",
+      "The supplied original form remains available from the “Medical Form” button for editing and printing or saving as PDF."
     ]
   }
 }
