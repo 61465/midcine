@@ -1,26 +1,24 @@
 {
-  "version": "1.0.12",
-  "released": "2026-11-24",
-  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.12/NexusZone-Setup-1.0.12.exe",
+  "version": "1.0.13",
+  "released": "2026-11-25",
+  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.13/NexusZone-Setup-1.0.13.exe",
   "landingUrl": "https://61465.github.io/midcine/nexus-zone/",
-  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.12",
-  "sha256": "60163D540742D73A925BADC42A22A4F73994E5C5A5DC90B0993F96ED758C7AAA",
-  "size": 106988549,
+  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.13",
+  "sha256": "F99751D4F6C4EEDEF9D99747822F0D83C23C876FC36F289E09CC829BE53160E6",
+  "size": 106988968,
   "critical": false,
   "changelog": {
     "ar": [
+      "إضافة زر حذف للمريض في قائمة المرضى مع طلب التأكيد قبل الحذف.",
+      "يبقى سجل الروشتات السابقة محفوظًا في الأرشيف عند حذف ملف المريض.",
       "إظهار قالب الكشف الطبي المتجهي ضمن فئة حديث في معرض القوالب.",
-      "حفظ تعديلات القوالب الأساسية وإعادة تحميلها بعد تشغيل البرنامج.",
-      "حفظ اختيار القالب الافتراضي دون تعارض بين إعدادات الطبيب والعيادة.",
-      "إضافة شعار الطبيب وتوقيعه تلقائيًا إلى معاينة القوالب والطباعة.",
-      "انتظار اكتمال قراءة صور الشعار والتوقيع قبل حفظها."
+      "حفظ تعديلات القوالب الأساسية والقالب الافتراضي وإظهار شعار الطبيب وتوقيعه تلقائيًا في المعاينة والطباعة."
     ],
     "en": [
+      "Added a delete button to the patient list with a confirmation prompt.",
+      "Previous prescriptions remain in the archive when a patient file is deleted.",
       "Show the Vector Medical Examination template under the Modern gallery category.",
-      "Persist edits to built-in templates and reload them after restarting.",
-      "Save the default template consistently across doctor and clinic settings.",
-      "Automatically include the doctor logo and signature in template previews and printouts.",
-      "Wait for logo and signature image reads to finish before saving."
+      "Persist built-in template edits and the default template, and automatically show the doctor logo and signature in previews and printouts."
     ]
   }
 }
