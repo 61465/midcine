@@ -1,20 +1,26 @@
 {
-  "version": "1.0.13",
+  "version": "1.0.15",
   "released": "2026-11-25",
-  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.13/NexusZone-Setup-1.0.13.exe",
+  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.15/NexusZone-Setup-1.0.15.exe",
   "landingUrl": "https://61465.github.io/midcine/nexus-zone/",
-  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.13",
-  "sha256": "F99751D4F6C4EEDEF9D99747822F0D83C23C876FC36F289E09CC829BE53160E6",
-  "size": 106988968,
+  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.15",
+  "sha256": "B91179C4093DD978C9F58FB65D61452DDDA9CBD59A0AD1553E0A701C1FC09CB8",
+  "size": 106990128,
   "critical": false,
   "changelog": {
     "ar": [
+      "إصلاح الشاشة البيضاء التي منعت تسجيل الدخول.",
+      "تحسين تسجيل المرضى وتوليد أرقام ملفات فريدة حتى مع قواعد البيانات المُرحّلة.",
+      "منع إرسال نموذج تسجيل المريض أكثر من مرة عند النقر المتكرر.",
       "إضافة زر حذف للمريض في قائمة المرضى مع طلب التأكيد قبل الحذف.",
       "يبقى سجل الروشتات السابقة محفوظًا في الأرشيف عند حذف ملف المريض.",
       "إظهار قالب الكشف الطبي المتجهي ضمن فئة حديث في معرض القوالب.",
       "حفظ تعديلات القوالب الأساسية والقالب الافتراضي وإظهار شعار الطبيب وتوقيعه تلقائيًا في المعاينة والطباعة."
     ],
     "en": [
+      "Fixed the blank screen that prevented login.",
+      "Improved patient registration with unique file numbers for migrated databases.",
+      "Prevented duplicate patient creation from repeated form submissions.",
       "Added a delete button to the patient list with a confirmation prompt.",
       "Previous prescriptions remain in the archive when a patient file is deleted.",
       "Show the Vector Medical Examination template under the Modern gallery category.",
