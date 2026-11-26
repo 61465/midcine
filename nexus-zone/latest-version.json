@@ -1,14 +1,17 @@
 {
-  "version": "1.0.15",
-  "released": "2026-11-25",
-  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.15/NexusZone-Setup-1.0.15.exe",
+  "version": "1.0.16",
+  "released": "2026-11-26",
+  "downloadUrl": "https://github.com/61465/midcine/releases/download/v1.0.16/NexusZone-Setup-1.0.16.exe",
   "landingUrl": "https://61465.github.io/midcine/nexus-zone/",
-  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.15",
-  "sha256": "B91179C4093DD978C9F58FB65D61452DDDA9CBD59A0AD1553E0A701C1FC09CB8",
-  "size": 106990128,
+  "releaseNotesUrl": "https://github.com/61465/midcine/releases/tag/v1.0.16",
+  "sha256": "6804C88FD5216B8B39460B5C7AB1994EFD74F3EF247A83404A01E3CCDF7E14B9",
+  "size": 106990723,
   "critical": false,
   "changelog": {
     "ar": [
+      "إصلاح نافذة سجل المريض: منع اختفاء اسم المريض وظهور جميع التفاصيل والملاحظات وفصيلة الدم والأمراض المزمنة بشكل صحيح.",
+      "إصلاح تصفية الروشتات في سجل المريض لعرض روشتات المريض المحدد فقط.",
+      "توحيد تنسيق حقول المرضى بين قاعدة البيانات وواجهة التطبيق.",
       "إصلاح الشاشة البيضاء التي منعت تسجيل الدخول.",
       "تحسين تسجيل المرضى وتوليد أرقام ملفات فريدة حتى مع قواعد البيانات المُرحّلة.",
       "منع إرسال نموذج تسجيل المريض أكثر من مرة عند النقر المتكرر.",
@@ -18,6 +21,9 @@
       "حفظ تعديلات القوالب الأساسية والقالب الافتراضي وإظهار شعار الطبيب وتوقيعه تلقائيًا في المعاينة والطباعة."
     ],
     "en": [
+      "Fixed patient history modal so patient name, notes, blood group, and chronic diseases display properly.",
+      "Fixed prescription filtering in patient history to show only the selected patient's prescriptions.",
+      "Unified camelCase/snake_case patient field mapping across backend and frontend.",
       "Fixed the blank screen that prevented login.",
       "Improved patient registration with unique file numbers for migrated databases.",
       "Prevented duplicate patient creation from repeated form submissions.",
